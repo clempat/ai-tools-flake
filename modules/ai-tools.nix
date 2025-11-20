@@ -183,11 +183,5 @@ in {
     home.file.".config/mcphub/servers.json" = mkIf cfg.enableMcphub {
       text = mcphubConfig;
     };
-
-    # Install extra packages
-    home.packages = with pkgs; [
-      gh          # GitHub CLI for ticket-driven-developer agent
-      ripgrep     # Fast search tool used by AI tools
-    ];
   };
 }
