@@ -252,7 +252,7 @@ in {
     programs.claude-code = mkIf cfg.enableClaudeCode (mkMerge [
       {
         enable = true;
-        package = pkgs.unstable.claude-code;
+        package = pkgs.claude-code;
         mcpServers = cfg.mcpServers;
         settings = {
           theme = "dark";
@@ -267,7 +267,7 @@ in {
     programs.opencode = mkIf cfg.enableOpencode (mkMerge [
       {
         enable = true;
-        package = pkgs.unstable.opencode;
+        package = pkgs.opencode;
         settings = {
           theme = "dark";
           mcp = lib.mapAttrs transformMcpForOpencode cfg.mcpServers;
