@@ -49,19 +49,24 @@ let
     else
       withDisabled;
 
+  # Hardcoded personal configuration
+  personalMcpServers = import ../config/mcps.nix;
+  personalAgents = import ../config/agents.nix;
+  personalMemory = ../config/memory.md;
+
   # Generate mcphub.nvim servers.json
-  mcphubServers = lib.mapAttrs transformMcpForMcphub cfg.mcpServers;
+  mcphubServers = lib.mapAttrs transformMcpForMcphub personalMcpServers;
   mcphubConfig = builtins.toJSON { mcpServers = mcphubServers; };
 
   # Generate claude-code agent frontmatter
   generateClaudeFrontmatter = name: agent:
     let
-      fields = lib.optionals (!agent.disable)
+      fields = lib.optionals (!(agent.disable or false))
         ([ "name: ${name}" "description: |" "  ${agent.description}" ]
-          ++ lib.optional (agent.tools != null)
+          ++ lib.optional ((agent.tools or null) != null)
           "tools: [${lib.concatStringsSep ", " agent.tools}]"
-          ++ lib.optional (agent.model != null) "model: ${agent.model}"
-          ++ lib.optional (agent.color != null) "color: ${agent.color}");
+          ++ lib.optional ((agent.model or null) != null) "model: ${agent.model}"
+          ++ lib.optional ((agent.color or null) != null) "color: ${agent.color}");
     in ''
       ---
       ${lib.concatStringsSep "\n" fields}
@@ -72,15 +77,15 @@ let
   generateOpencodeFrontmatter = name: agent:
     let
       fields = [ "description: ${agent.description}" ]
-        ++ lib.optional (agent.mode != null) "mode: ${agent.mode}"
-        ++ lib.optional (agent.opencodeModel != null)
+        ++ lib.optional ((agent.mode or null) != null) "mode: ${agent.mode}"
+        ++ lib.optional ((agent.opencodeModel or null) != null)
         "model: ${agent.opencodeModel}"
-        ++ lib.optional (agent.temperature != null)
+        ++ lib.optional ((agent.temperature or null) != null)
         "temperature: ${toString agent.temperature}"
-        ++ lib.optional agent.disable "disable: true";
+        ++ lib.optional (agent.disable or false) "disable: true";
 
       toolsSection = lib.optionalString
-        (agent.opencodeMcp != null && agent.opencodeMcp != [ ]) ''
+        ((agent.opencodeMcp or null) != null && agent.opencodeMcp != [ ]) ''
           tools:
           ${lib.concatMapStringsSep "\n" (mcp: "  ${mcp}*: true")
           agent.opencodeMcp}
@@ -109,158 +114,38 @@ let
       fullContent; # opencode expects text, not derivation
 
   # Convert agents to directories for each tool
-  claudeAgentsDir = if cfg.agents != { } then
+  claudeAgentsDir = if personalAgents != { } then
     pkgs.linkFarm "claude-agents" (lib.mapAttrsToList (name: agent: {
       name = "${name}.md";
       path = generateAgentFile "claude" name agent;
-    }) (lib.filterAttrs (name: agent: !agent.disable) cfg.agents))
+    }) (lib.filterAttrs (name: agent: !(agent.disable or false)) personalAgents))
   else
     null;
 
   opencodeAgents =
     lib.mapAttrs (name: agent: generateAgentFile "opencode" name agent)
-    (lib.filterAttrs (name: agent: !agent.disable) cfg.agents);
-
-  # Agent option type
-  agentType = types.submodule {
-    options = {
-      content = mkOption {
-        type = types.path;
-        description =
-          "Path to agent content markdown file (without frontmatter)";
-      };
-
-      description = mkOption {
-        type = types.str;
-        description = "Brief description of agent purpose and when to use it";
-      };
-
-      # Claude-code specific
-      tools = mkOption {
-        type = types.nullOr (types.listOf types.str);
-        default = null;
-        description =
-          "List of tools for claude-code (Glob, Grep, Read, Write, etc.)";
-      };
-
-      model = mkOption {
-        type = types.nullOr types.str;
-        default = null;
-        description = "Model name for claude-code (sonnet, opus, haiku)";
-      };
-
-      color = mkOption {
-        type = types.nullOr types.str;
-        default = null;
-        description = "Color for claude-code agent";
-      };
-
-      # Opencode specific
-      mode = mkOption {
-        type = types.nullOr (types.enum [ "primary" "subagent" "all" ]);
-        default = "all";
-        description = "Agent mode for opencode";
-      };
-
-      temperature = mkOption {
-        type = types.nullOr types.float;
-        default = null;
-        description = "Temperature for opencode (0.0-1.0)";
-      };
-
-      opencodeModel = mkOption {
-        type = types.nullOr types.str;
-        default = null;
-        description =
-          "Full model identifier for opencode (e.g., anthropic/claude-sonnet-4)";
-      };
-
-      opencodeMcp = mkOption {
-        type = types.nullOr (types.listOf types.str);
-        default = null;
-        description =
-          "List of MCP server names this agent can access in opencode";
-      };
-
-      disable = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Disable this agent";
-      };
-    };
-  };
+    (lib.filterAttrs (name: agent: !(agent.disable or false)) personalAgents);
 
 in {
   options.programs.ai-tools = {
     enable = mkEnableOption "unified AI tools configuration";
 
-    mcpServers = mkOption {
-      type = types.attrsOf types.attrs;
-      default = { };
-      description = "MCP servers configuration (claude-code format)";
-      example = {
-        context7 = {
-          type = "http";
-          url = "https://mcp.context7.com/mcp";
-          headers = { Authorization = "Bearer \${TOKEN}"; };
-        };
-      };
-    };
-
-    agents = mkOption {
-      type = types.attrsOf agentType;
-      default = { };
-      description = "AI agents configuration";
-      example = {
-        reviewer = {
-          content = ./agents/reviewer.md;
-          description = "Reviews code for quality and best practices";
-          tools = [ "Read" "Grep" ];
-          model = "sonnet";
-          mode = "subagent";
-        };
-      };
-    };
-
-    memory = mkOption {
-      type = types.nullOr types.path;
-      default = null;
-      description = "Memory/rules file path";
-    };
-
     enableClaudeCode = mkOption {
       type = types.bool;
       default = true;
-      description = "Enable claude-code with this configuration";
+      description = "Enable claude-code";
     };
 
     enableOpencode = mkOption {
       type = types.bool;
       default = true;
-      description = "Enable opencode with this configuration";
+      description = "Enable opencode";
     };
 
     enableMcphub = mkOption {
       type = types.bool;
       default = false;
-      description = "Enable mcphub.nvim with this configuration";
-    };
-
-    extraPackages = mkOption {
-      type = types.listOf types.package;
-      default = with pkgs; [
-        gh          # GitHub CLI for ticket-driven-developer agent
-        ripgrep     # Fast search tool used by AI tools
-      ];
-      description = "Additional packages to install alongside AI tools";
-      example = lib.literalExpression ''
-        with pkgs; [
-          gh          # GitHub CLI for ticket-driven-developer agent
-          jq          # JSON processor
-          ripgrep     # Fast search tool
-          nodejs      # For npx-based MCP servers
-        ]
-      '';
+      description = "Enable mcphub.nvim";
     };
   };
 
@@ -270,14 +155,14 @@ in {
       {
         enable = true;
         package = pkgs.claude-code;
-        mcpServers = cfg.mcpServers;
+        mcpServers = personalMcpServers;
         settings = {
           theme = "dark";
           preferredNotifChannel = "native";
         };
       }
       (mkIf (claudeAgentsDir != null) { agentsDir = claudeAgentsDir; })
-      (mkIf (cfg.memory != null) { memory.source = cfg.memory; })
+      { memory.source = personalMemory; }
     ]);
 
     # Configure opencode
@@ -287,11 +172,11 @@ in {
         package = pkgs.opencode;
         settings = {
           theme = "dark";
-          mcp = lib.mapAttrs transformMcpForOpencode cfg.mcpServers;
+          mcp = lib.mapAttrs transformMcpForOpencode personalMcpServers;
         };
       }
       (mkIf (opencodeAgents != { }) { agents = opencodeAgents; })
-      (mkIf (cfg.memory != null) { rules = cfg.memory; })
+      { rules = personalMemory; }
     ]);
 
     # Configure mcphub.nvim
@@ -300,6 +185,9 @@ in {
     };
 
     # Install extra packages
-    home.packages = cfg.extraPackages;
+    home.packages = with pkgs; [
+      gh          # GitHub CLI for ticket-driven-developer agent
+      ripgrep     # Fast search tool used by AI tools
+    ];
   };
 }

@@ -18,13 +18,6 @@
         # Home-manager module
         homeManagerModules.default = ./modules/ai-tools.nix;
 
-        # Default configurations
-        lib.defaultConfig = {
-          agents = import ./config/agents.nix;
-          mcpServers = import ./config/mcps.nix;
-          memory = ./config/memory.md;
-        };
-
         # Overlays
         overlays.default = import ./overlays/default.nix { inherit inputs; };
       };
