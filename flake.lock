@@ -1,0 +1,95 @@
+{
+  "nodes": {
+    "flake-parts": {
+      "inputs": {
+        "nixpkgs-lib": "nixpkgs-lib"
+      },
+      "locked": {
+        "lastModified": 1762980239,
+        "narHash": "sha256-8oNVE8TrD19ulHinjaqONf9QWCKK+w4url56cdStMpM=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "52a2caecc898d0b46b2b905f058ccc5081f842da",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1763334038,
+        "narHash": "sha256-LBVOyaH6NFzQ3X/c6vfMZ9k4SV2ofhpxeL9YnhHNJQQ=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "4c8cdd5b1a630e8f72c9dd9bf582b1afb3127d2c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-25.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-lib": {
+      "locked": {
+        "lastModified": 1761765539,
+        "narHash": "sha256-b0yj6kfvO8ApcSE+QmA6mUfu8IYG6/uU28OFn4PaC8M=",
+        "owner": "nix-community",
+        "repo": "nixpkgs.lib",
+        "rev": "719359f4562934ae99f5443f20aa06c2ffff91fc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "nixpkgs.lib",
+        "type": "github"
+      }
+    },
+    "nixpkgs-unstable": {
+      "locked": {
+        "lastModified": 1763421233,
+        "narHash": "sha256-Stk9ZYRkGrnnpyJ4eqt9eQtdFWRRIvMxpNRf4sIegnw=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "89c2b2330e733d6cdb5eae7b899326930c2c0648",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "opencode": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1763619051,
+        "narHash": "sha256-oWRn1DWpOi3UyXfP/5Ez5bpHzHdOjDwLMyBrIvB3pa4=",
+        "owner": "sst",
+        "repo": "opencode",
+        "rev": "00b5e9f6ca33efe4753c6068e28e9680f9f218f3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sst",
+        "repo": "opencode",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "flake-parts": "flake-parts",
+        "nixpkgs": "nixpkgs",
+        "nixpkgs-unstable": "nixpkgs-unstable",
+        "opencode": "opencode"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
