@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, inputs, system, ... }:
 
 with lib;
 
@@ -154,7 +154,7 @@ in {
     programs.claude-code = mkIf cfg.enableClaudeCode (mkMerge [
       {
         enable = true;
-        package = pkgs.claude-code;
+        package = inputs.ai-tools.packages.${system}.claude-code;
         mcpServers = personalMcpServers;
         settings = {
           theme = "dark";
@@ -169,7 +169,7 @@ in {
     programs.opencode = mkIf cfg.enableOpencode (mkMerge [
       {
         enable = true;
-        package = pkgs.opencode;
+        package = inputs.ai-tools.packages.${system}.opencode;
         settings = {
           theme = "dark";
           mcp = lib.mapAttrs transformMcpForOpencode personalMcpServers;

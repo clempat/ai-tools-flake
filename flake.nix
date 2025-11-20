@@ -32,6 +32,12 @@
         # Packages
         packages = {
           spec-kit = pkgs'.callPackage ./pkgs/spec-kit.nix { };
+
+          # Export opencode (from unstable nixpkgs)
+          opencode = pkgs'.opencode;
+
+          # Export claude-code (from unstable nixpkgs)
+          claude-code = pkgs'.claude-code;
         };
 
         # Quick AI shell (without home-manager)
