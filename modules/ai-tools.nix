@@ -6,14 +6,9 @@ let
   cfg = config.programs.ai-tools;
 
   # Transform MCP server for opencode
+  # Remove 'enable' field - we control availability via tools section
   transformMcpForOpencode = name: server:
-    let
-      baseServer = if server ? enable then
-        (builtins.removeAttrs server [ "enable" ]) // {
-          enabled = server.enable;
-        }
-      else
-        server;
+    let baseServer = builtins.removeAttrs server [ "enable" ];
     in if baseServer.type == "http" then
       (builtins.removeAttrs baseServer [ "type" ]) // { type = "remote"; }
     else if baseServer.type == "stdio" then
@@ -41,10 +36,10 @@ let
       else
         baseServer;
     in if server.type == "http" then
-      # http servers: keep url and headers, remove type
+    # http servers: keep url and headers, remove type
       withDisabled
     else if server.type == "stdio" then
-      # stdio servers: keep command, args, env as-is
+    # stdio servers: keep command, args, env as-is
       withDisabled
     else
       withDisabled;
@@ -54,19 +49,45 @@ let
   personalAgents = import ../config/agents.nix;
   personalMemory = ../config/memory.md;
 
+  # Generate list of disabled MCP servers for claude-code settings
+  disabledMcpServers = lib.attrNames
+    (lib.filterAttrs (name: server: !(server.enable or false))
+      personalMcpServers);
+
   # Generate mcphub.nvim servers.json
   mcphubServers = lib.mapAttrs transformMcpForMcphub personalMcpServers;
   mcphubConfig = builtins.toJSON { mcpServers = mcphubServers; };
 
+  # Convert mcps list to Claude Code tools format (mcp__{name})
+  mcpListToClaudeTools = mcps:
+    map (name: "mcp__${name}") mcps;
+
+  # Convert mcps list to Opencode tools format ({name}*: true)
+  mcpListToOpencodeTools = mcps:
+    lib.listToAttrs (map (name: lib.nameValuePair "${name}*" true) mcps);
+
   # Generate claude-code agent frontmatter
   generateClaudeFrontmatter = name: agent:
     let
+      # Merge base tools with MCP tools from mcps list
+      allTools = (agent.tools or [ ])
+        ++ (if (agent.mcps or null) != null then
+          mcpListToClaudeTools agent.mcps
+        else if (agent.opencodeTools or null) != null then
+          # Backward compat: convert old opencodeTools format
+          map (pattern: "mcp__${lib.removeSuffix "*" pattern}")
+          (lib.attrNames agent.opencodeTools)
+        else
+          [ ]);
+
       fields = lib.optionals (!(agent.disable or false))
         ([ "name: ${name}" "description: |" "  ${agent.description}" ]
-          ++ lib.optional ((agent.tools or null) != null)
-          "tools: [${lib.concatStringsSep ", " agent.tools}]"
-          ++ lib.optional ((agent.model or null) != null) "model: ${agent.model}"
-          ++ lib.optional ((agent.color or null) != null) "color: ${agent.color}");
+          ++ lib.optional (allTools != [ ])
+          "tools: [${lib.concatStringsSep ", " allTools}]"
+          ++ lib.optional ((agent.model or null) != null)
+          "model: ${agent.model}"
+          ++ lib.optional ((agent.color or null) != null)
+          "color: ${agent.color}");
     in ''
       ---
       ${lib.concatStringsSep "\n" fields}
@@ -76,6 +97,15 @@ let
   # Generate opencode agent frontmatter
   generateOpencodeFrontmatter = name: agent:
     let
+      # Compute tools section
+      opcodeTools =
+        if (agent.mcps or null) != null then
+          mcpListToOpencodeTools agent.mcps
+        else if (agent.opencodeTools or null) != null then
+          agent.opencodeTools
+        else
+          { };
+
       fields = [ "description: ${agent.description}" ]
         ++ lib.optional ((agent.mode or null) != null) "mode: ${agent.mode}"
         ++ lib.optional ((agent.opencodeModel or null) != null)
@@ -84,16 +114,17 @@ let
         "temperature: ${toString agent.temperature}"
         ++ lib.optional (agent.disable or false) "disable: true";
 
-      toolsSection = lib.optionalString
-        ((agent.opencodeMcp or null) != null && agent.opencodeMcp != [ ]) ''
-          tools:
-          ${lib.concatMapStringsSep "\n" (mcp: "  ${mcp}*: true")
-          agent.opencodeMcp}
-        '';
+      toolsSection = lib.optionalString (opcodeTools != { }) ''
+        tools:
+        ${lib.concatStringsSep "\n" (lib.mapAttrsToList (pattern: enabled:
+          "  ${pattern}: ${if enabled then "true" else "false"}")
+          opcodeTools)}
+      '';
     in ''
       ---
       ${lib.concatStringsSep "\n" fields}
-      ${toolsSection}---
+      ${toolsSection}
+      ---
     '';
 
   # Generate agent file with frontmatter + content
@@ -118,7 +149,8 @@ let
     pkgs.linkFarm "claude-agents" (lib.mapAttrsToList (name: agent: {
       name = "${name}.md";
       path = generateAgentFile "claude" name agent;
-    }) (lib.filterAttrs (name: agent: !(agent.disable or false)) personalAgents))
+    })
+      (lib.filterAttrs (name: agent: !(agent.disable or false)) personalAgents))
   else
     null;
 
@@ -126,62 +158,71 @@ let
     lib.mapAttrs (name: agent: generateAgentFile "opencode" name agent)
     (lib.filterAttrs (name: agent: !(agent.disable or false)) personalAgents);
 
+  # Convert commands directory to attribute set for home-manager
+  commandsAttrSet = let
+    commandsDir = ../config/commands;
+    commandFiles = builtins.readDir commandsDir;
+  in lib.mapAttrs' (name: type:
+    let
+      # Remove .md extension for command name
+      commandName = lib.removeSuffix ".md" name;
+    in lib.nameValuePair commandName (commandsDir + "/${name}"))
+  (lib.filterAttrs (name: type: type == "regular" && lib.hasSuffix ".md" name)
+    commandFiles);
+
 in {
   options.programs.ai-tools = {
     enable = mkEnableOption "unified AI tools configuration";
-
-    enableClaudeCode = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Enable claude-code";
-    };
-
-    enableOpencode = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Enable opencode";
-    };
-
-    enableMcphub = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Enable mcphub.nvim";
-    };
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf cfg.enable (mkMerge [
     # Configure claude-code
-    programs.claude-code = mkIf cfg.enableClaudeCode (mkMerge [
+    (mkMerge [
       {
-        enable = true;
-        package = inputs.ai-tools.packages.${system}.claude-code;
-        mcpServers = personalMcpServers;
-        settings = {
-          theme = "dark";
-          preferredNotifChannel = "native";
+        programs.claude-code = {
+          enable = true;
+          package = inputs.ai-tools.packages.${system}.claude-code;
+          mcpServers = personalMcpServers;
+          settings = {
+            theme = "dark";
+            preferredNotifChannel = "native";
+            disabledMcpjsonServers = disabledMcpServers;
+          };
         };
       }
-      (mkIf (claudeAgentsDir != null) { agentsDir = claudeAgentsDir; })
-      { memory.source = personalMemory; }
-    ]);
+      (mkIf (claudeAgentsDir != null) {
+        programs.claude-code.agentsDir = claudeAgentsDir;
+      })
+      {
+        programs.claude-code.memory.source = personalMemory;
+        programs.claude-code.commands = commandsAttrSet;
+      }
+    ])
 
     # Configure opencode
-    programs.opencode = mkIf cfg.enableOpencode (mkMerge [
+    (mkMerge [
       {
-        enable = true;
-        package = inputs.ai-tools.packages.${system}.opencode;
-        settings = {
-          theme = "dark";
-          mcp = lib.mapAttrs transformMcpForOpencode personalMcpServers;
+        programs.opencode = {
+          enable = true;
+          package = inputs.ai-tools.packages.${system}.opencode;
+          settings = {
+            theme = "dark";
+            mcp = lib.mapAttrs transformMcpForOpencode personalMcpServers;
+            tools =
+              # Disable per-agent MCP tools globally (those with enable = false)
+              lib.mapAttrs' (name: server: lib.nameValuePair "${name}*" false)
+              (lib.filterAttrs (name: server: !(server.enable or false))
+                personalMcpServers);
+          };
         };
       }
-      (mkIf (opencodeAgents != { }) { agents = opencodeAgents; })
-      { rules = personalMemory; }
-    ]);
-
-    # Configure mcphub.nvim
-    home.file.".config/mcphub/servers.json" = mkIf cfg.enableMcphub {
-      text = mcphubConfig;
-    };
-  };
+      (mkIf (opencodeAgents != { }) {
+        programs.opencode.agents = opencodeAgents;
+      })
+      {
+        programs.opencode.rules = personalMemory;
+        programs.opencode.commands = commandsAttrSet;
+      }
+    ])
+  ]);
 }

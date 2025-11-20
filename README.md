@@ -8,12 +8,9 @@ Unified Nix flake for AI tools configuration including Claude Code, OpenCode, MC
 - **MCP Servers**: Shared MCP server configurations across tools
 - **AI Agents**: Reusable agent definitions with tool-specific metadata
 - **Claude Skills**: Pre-configured skills for various tasks
+- **Claude-Flow Commands**: Uses upstream `programs.{opencode,claude-code}.commands` options
 - **Packages**: Custom packages like spec-kit
 - **Default Configurations**: Sensible defaults that can be overridden per-system
-
-## Requirements
-
-- **GitHub CLI (`gh`)**: Required for `ticket-driven-developer` agent (included by default in `extraPackages`)
 
 ## Usage
 
@@ -46,6 +43,7 @@ Add to your `flake.nix`:
     enable = true;
     # Uses default MCPs, agents, and memory
     # Default extraPackages includes gh and ripgrep
+    # Automatically installs claude-flow commands via upstream options
   };
 }
 ```
@@ -106,12 +104,61 @@ in {
     enableClaudeCode = true;
     enableOpencode = true;
     enableMcphub = false;
+
+    # Claude-flow commands (enabled by default)
+    enableClaudeFlowCommands = true;
+    # Optional: use custom commands directory
+    # commandsDir = ./my-commands;
   };
 
   # Install Claude skills manually (until module supports them)
   home.file.".claude/skills/lint-with-conform".source =
-    "${ai-tools-flake}/skills/lint-with-conform";
+    "${ai-tools-flake}/config/skills/lint-with-conform";
 }
+```
+
+### Claude-Flow Commands
+
+The flake includes 9 pre-configured workflow commands that are automatically configured via upstream home-manager options:
+
+- Uses `programs.opencode.commands` for OpenCode
+- Uses `programs.claude-code.commands` for Claude Desktop
+
+Available commands:
+
+- **commit**: Create git commits for changes
+- **create_plan**: Generate implementation plans
+- **create_spec**: Create feature specifications
+- **create_ticket**: Generate Jira tickets
+- **create_worktree**: Create git worktrees
+- **implement_plan**: Execute implementation plans
+- **research_codebase**: Document and explain codebases
+- **research_confluence**: Research Confluence documentation
+- **validate_plan**: Validate implementation plans
+
+To disable auto-installation:
+
+```nix
+programs.ai-tools = {
+  enable = true;
+  enableClaudeFlowCommands = false;
+};
+```
+
+To use custom commands directory:
+
+```nix
+programs.ai-tools = {
+  enable = true;
+  commandsDir = ./my-custom-commands;
+};
+```
+
+**Note**: Users can still add their own commands using the upstream options directly:
+
+```nix
+programs.opencode.commands = ./my-extra-commands;
+programs.claude-code.commands = ./my-extra-commands;
 ```
 
 ### Using the Overlay
@@ -142,15 +189,25 @@ ai-tools-flake/
 ├── flake.nix              # Main flake definition
 ├── modules/
 │   └── ai-tools.nix       # Home-manager module
-├── config/
+├── config/                # All configuration
 │   ├── agents.nix         # Default agent configurations
 │   ├── mcps.nix           # Default MCP server configurations
 │   ├── memory.md          # Default memory/rules
-│   └── agents/            # Agent content markdown files
-├── skills/                # Claude skills
-│   ├── lint-with-conform/
-│   ├── nixos-advisor/
-│   └── obsidian-worklog/
+│   ├── agents/            # Agent content markdown files
+│   └── skills/            # Claude skills
+│       ├── lint-with-conform/
+│       ├── nixos-advisor/
+│       └── nixos-command-not-found/
+├── commands/              # Claude-flow workflow commands
+│   ├── commit.md
+│   ├── create_plan.md
+│   ├── create_spec.md
+│   ├── create_ticket.md
+│   ├── create_worktree.md
+│   ├── implement_plan.md
+│   ├── research_codebase.md
+│   ├── research_confluence.md
+│   └── validate_plan.md
 ├── pkgs/
 │   └── spec-kit.nix       # Spec-kit package
 └── overlays/

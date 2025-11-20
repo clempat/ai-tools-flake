@@ -82,7 +82,7 @@
   };
 
   context7 = {
-    enable = true;
+    enable = true; # Enabled globally for all agents
     type = "http";
     url = "https://mcp.patout.app/mcp/context7";
     headers = {
