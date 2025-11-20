@@ -29,10 +29,30 @@
         overlays.default = import ./overlays/default.nix { inherit inputs; };
       };
 
-      perSystem = { config, self', inputs', pkgs, system, ... }: {
+      perSystem = { config, self', inputs', pkgs, system, ... }: let
+        # Allow unfree packages
+        pkgs' = import inputs.nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+        };
+      in {
         # Packages
         packages = {
-          spec-kit = pkgs.callPackage ./pkgs/spec-kit.nix { };
+          spec-kit = pkgs'.callPackage ./pkgs/spec-kit.nix { };
+        };
+
+        # Quick AI shell (without home-manager)
+        devShells.default = pkgs'.mkShell {
+          name = "ai-tools";
+          packages = with pkgs'; [
+            opencode
+            claude-code
+          ];
+          
+          shellHook = ''
+            echo "AI Tools: opencode, claude-code"
+            echo "For full config: use homeManagerModules.default"
+          '';
         };
       };
     };
