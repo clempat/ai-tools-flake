@@ -1,9 +1,19 @@
 { inputs, ... }:
-final: prev:
-prev.lib.optionalAttrs prev.stdenv.isLinux {
-  # Use a wrapper for opencode that sets up proper library paths for ARM64 Linux
-  opencode = prev.writeShellScriptBin "opencode" ''
-    export LD_LIBRARY_PATH="${prev.stdenv.cc.cc.lib}/lib:${prev.glibc}/lib:$LD_LIBRARY_PATH"
-    exec ${prev.opencode}/bin/opencode "$@"
-  '';
+final: prev: 
+let
+  packageJson = builtins.fromJSON 
+    (builtins.readFile "${inputs.opencode}/packages/opencode/package.json");
+in {
+  # Override opencode to use latest version from flake input
+  opencode = prev.opencode.overrideAttrs (old: {
+    version = packageJson.version;
+    src = inputs.opencode;
+    patches = [];  # Disable patches from old version
+    
+    node_modules = old.node_modules.overrideAttrs {
+      version = packageJson.version;
+      src = inputs.opencode;
+      outputHash = "sha256-F7OzOlXa8K+bQc6Enkx1+zWXl4dinnuAVuZ+rY3Brzk=";
+    };
+  });
 }

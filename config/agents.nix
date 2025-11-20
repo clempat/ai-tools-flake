@@ -76,4 +76,30 @@
     temperature = 0.1;
     opencodeMcp = [ "nixos" ];
   };
+
+  ticket-driven-developer = {
+    content = ./agents/ticket-driven-developer.md;
+    description = "Ticket-driven dev agent that requires Jira ticket, checks Figma designs, uses GitHub tools, and operates in plan-first mode with clarifying questions";
+    tools = [
+      "Glob"
+      "Grep"
+      "Read"
+      "Write"
+      "Edit"
+      "MultiEdit"
+      "WebFetch"
+      "TodoWrite"
+      "Bash"
+    ];
+    model = "sonnet";
+    color = "yellow";
+    mode = "all";
+    temperature = 0.2;
+    opencodeMcp = [
+      "atlassian"
+      "figma-desktop"
+      "brave-search"
+      "context7"
+    ];
+  };
 }

@@ -245,6 +245,23 @@ in {
       default = false;
       description = "Enable mcphub.nvim with this configuration";
     };
+
+    extraPackages = mkOption {
+      type = types.listOf types.package;
+      default = with pkgs; [
+        gh          # GitHub CLI for ticket-driven-developer agent
+        ripgrep     # Fast search tool used by AI tools
+      ];
+      description = "Additional packages to install alongside AI tools";
+      example = lib.literalExpression ''
+        with pkgs; [
+          gh          # GitHub CLI for ticket-driven-developer agent
+          jq          # JSON processor
+          ripgrep     # Fast search tool
+          nodejs      # For npx-based MCP servers
+        ]
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
@@ -281,5 +298,8 @@ in {
     home.file.".config/mcphub/servers.json" = mkIf cfg.enableMcphub {
       text = mcphubConfig;
     };
+
+    # Install extra packages
+    home.packages = cfg.extraPackages;
   };
 }

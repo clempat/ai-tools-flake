@@ -11,6 +11,10 @@ Unified Nix flake for AI tools configuration including Claude Code, OpenCode, MC
 - **Packages**: Custom packages like spec-kit
 - **Default Configurations**: Sensible defaults that can be overridden per-system
 
+## Requirements
+
+- **GitHub CLI (`gh`)**: Required for `ticket-driven-developer` agent (included by default in `extraPackages`)
+
 ## Usage
 
 ### As a Flake Input
@@ -41,6 +45,7 @@ Add to your `flake.nix`:
   programs.ai-tools = {
     enable = true;
     # Uses default MCPs, agents, and memory
+    # Default extraPackages includes gh and ripgrep
   };
 }
 ```
@@ -89,6 +94,14 @@ in {
     memory = ai-tools-flake.lib.defaultConfig.memory;
     # or
     # memory = ./my-memory.md;
+
+    # Override default extra packages (gh, ripgrep)
+    extraPackages = with pkgs; [
+      gh       # GitHub CLI for ticket-driven-developer agent
+      jq       # JSON processor for data manipulation
+      ripgrep  # Fast search tool
+      nodejs   # For npx-based MCP servers like playwright
+    ];
 
     enableClaudeCode = true;
     enableOpencode = true;
@@ -150,6 +163,7 @@ ai-tools-flake/
 - **senior-code-reviewer**: Code quality, architecture, security
 - **ui-engineer**: UI/UX, accessibility, design systems
 - **nixos**: NixOS configuration with MCP integration
+- **ticket-driven-developer**: Jira ticket-driven dev with spec-kit integration (requires `gh` CLI)
 
 ## Available MCP Servers
 

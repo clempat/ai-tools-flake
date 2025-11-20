@@ -47,10 +47,11 @@
           packages = with pkgs'; [
             opencode
             claude-code
+            gh  # Required for ticket-driven-developer agent
           ];
           
           shellHook = ''
-            echo "AI Tools: opencode, claude-code"
+            echo "AI Tools: opencode, claude-code, gh"
             echo "For full config: use homeManagerModules.default"
           '';
         };
