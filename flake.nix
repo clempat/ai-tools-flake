@@ -7,7 +7,6 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
 
     opencode.url = "github:sst/opencode";
-    opencode.flake = false;
   };
 
   outputs = inputs@{ flake-parts, ... }:
@@ -33,8 +32,8 @@
         packages = {
           spec-kit = pkgs'.callPackage ./pkgs/spec-kit.nix { };
 
-          # Export opencode (from unstable nixpkgs)
-          opencode = pkgs'.opencode;
+          # Export opencode (from sst/opencode flake - latest dev)
+          opencode = inputs.opencode.packages.${system}.default;
 
           # Export claude-code (from unstable nixpkgs)
           claude-code = pkgs'.claude-code;
@@ -43,10 +42,10 @@
         # Quick AI shell (without home-manager)
         devShells.default = pkgs'.mkShell {
           name = "ai-tools";
-          packages = with pkgs'; [
-            opencode
-            claude-code
-            gh  # Required for ticket-driven-developer agent
+          packages = [
+            inputs.opencode.packages.${system}.default
+            pkgs'.claude-code
+            pkgs'.gh  # Required for ticket-driven-developer agent
           ];
           
           shellHook = ''
