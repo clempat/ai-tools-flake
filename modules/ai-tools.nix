@@ -59,8 +59,7 @@ let
   mcphubConfig = builtins.toJSON { mcpServers = mcphubServers; };
 
   # Convert mcps list to Claude Code tools format (mcp__{name})
-  mcpListToClaudeTools = mcps:
-    map (name: "mcp__${name}") mcps;
+  mcpListToClaudeTools = mcps: map (name: "mcp__${name}") mcps;
 
   # Convert mcps list to Opencode tools format ({name}*: true)
   mcpListToOpencodeTools = mcps:
@@ -70,15 +69,14 @@ let
   generateClaudeFrontmatter = name: agent:
     let
       # Merge base tools with MCP tools from mcps list
-      allTools = (agent.tools or [ ])
-        ++ (if (agent.mcps or null) != null then
-          mcpListToClaudeTools agent.mcps
-        else if (agent.opencodeTools or null) != null then
-          # Backward compat: convert old opencodeTools format
-          map (pattern: "mcp__${lib.removeSuffix "*" pattern}")
-          (lib.attrNames agent.opencodeTools)
-        else
-          [ ]);
+      allTools = (agent.tools or [ ]) ++ (if (agent.mcps or null) != null then
+        mcpListToClaudeTools agent.mcps
+      else if (agent.opencodeTools or null) != null then
+      # Backward compat: convert old opencodeTools format
+        map (pattern: "mcp__${lib.removeSuffix "*" pattern}")
+        (lib.attrNames agent.opencodeTools)
+      else
+        [ ]);
 
       fields = lib.optionals (!(agent.disable or false))
         ([ "name: ${name}" "description: |" "  ${agent.description}" ]
@@ -98,13 +96,12 @@ let
   generateOpencodeFrontmatter = name: agent:
     let
       # Compute tools section
-      opcodeTools =
-        if (agent.mcps or null) != null then
-          mcpListToOpencodeTools agent.mcps
-        else if (agent.opencodeTools or null) != null then
-          agent.opencodeTools
-        else
-          { };
+      opcodeTools = if (agent.mcps or null) != null then
+        mcpListToOpencodeTools agent.mcps
+      else if (agent.opencodeTools or null) != null then
+        agent.opencodeTools
+      else
+        { };
 
       fields = [ "description: ${agent.description}" ]
         ++ lib.optional ((agent.mode or null) != null) "mode: ${agent.mode}"
@@ -117,8 +114,7 @@ let
       toolsSection = lib.optionalString (opcodeTools != { }) ''
         tools:
         ${lib.concatStringsSep "\n" (lib.mapAttrsToList (pattern: enabled:
-          "  ${pattern}: ${if enabled then "true" else "false"}")
-          opcodeTools)}
+          "  ${pattern}: ${if enabled then "true" else "false"}") opcodeTools)}
       '';
     in ''
       ---
@@ -208,6 +204,8 @@ in {
           settings = {
             theme = "dark";
             mcp = lib.mapAttrs transformMcpForOpencode personalMcpServers;
+            keybindings.session_child_cycle = "alt+right";
+            keybindings.session_child_cycle_reverse = "alt+left";
             tools =
               # Disable per-agent MCP tools globally (those with enable = false)
               lib.mapAttrs' (name: server: lib.nameValuePair "${name}*" false)
