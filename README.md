@@ -6,11 +6,18 @@ Unified Nix flake for AI tools configuration including Claude Code, OpenCode, MC
 
 - **Unified Module**: Single home-manager module that configures both Claude Code and OpenCode
 - **MCP Servers**: Shared MCP server configurations across tools
+- **Claude Desktop Integration**: Auto-configures MCP servers for Claude Desktop on macOS
 - **AI Agents**: Reusable agent definitions with tool-specific metadata
 - **Claude Skills**: Pre-configured skills for various tasks
 - **Claude-Flow Commands**: Uses upstream `programs.{opencode,claude-code}.commands` options
 - **Packages**: Custom packages like spec-kit
 - **Default Configurations**: Sensible defaults that can be overridden per-system
+- **Flexible Versioning**: Control opencode/claude-code versions via flake follows or nixpkgs overlays
+
+## Requirements
+
+- **home-manager**: Must use `unstable` branch (programs.claude-code only in unstable)
+- **nixpkgs**: Recommends `nixos-unstable` (claude-code package)
 
 ## Usage
 
@@ -21,165 +28,100 @@ Add to your `flake.nix`:
 ```nix
 {
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    home-manager.url = "github:nix-community/home-manager";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    
     ai-tools.url = "github:clempat/ai-tools-flake";
+    ai-tools.inputs.nixpkgs.follows = "nixpkgs";  # Use your nixpkgs
   };
 
-  outputs = { nixpkgs, ai-tools, ... }: {
-    # Your configuration
+  outputs = { nixpkgs, home-manager, ai-tools, ... }: {
+    homeConfigurations.youruser = home-manager.lib.homeManagerConfiguration {
+      pkgs = nixpkgs.legacyPackages.x86_64-linux;
+      modules = [
+        ai-tools.homeManagerModules.default
+        {
+          programs.ai-tools.enable = true;
+        }
+      ];
+    };
   };
 }
 ```
 
 ### Home Manager Integration
 
-#### Basic Setup (Use Defaults)
+#### Basic Setup (Minimal)
 
 ```nix
+{ inputs, ... }:
 {
-  imports = [ ai-tools.homeManagerModules.default ];
+  imports = [ inputs.ai-tools.homeManagerModules.default ];
 
-  programs.ai-tools = {
-    enable = true;
-    # Uses default MCPs, agents, and memory
-    # Default extraPackages includes gh and ripgrep
-    # Automatically installs claude-flow commands via upstream options
-  };
+  programs.ai-tools.enable = true;
+  
+  # That's it! Automatically:
+  # - Installs claude-code & opencode from nixpkgs-unstable
+  # - Configures MCPs, agents, memory from config/
+  # - Adds claude-flow commands
+  # - Auto-configures Claude Desktop (macOS)
 }
 ```
 
-#### Custom Configuration
+#### Override Package Versions
+
+The module automatically uses packages from the flake. To override:
 
 ```nix
-{ config, ... }:
-let
-  ai-tools-flake = inputs.ai-tools;
-in {
-  imports = [ ai-tools-flake.homeManagerModules.default ];
+{ inputs, pkgs, ... }:
+{
+  imports = [ inputs.ai-tools.homeManagerModules.default ];
 
-  programs.ai-tools = {
-    enable = true;
-
-    # Merge with defaults
-    mcpServers = ai-tools-flake.lib.defaultConfig.mcpServers // {
-      # Enable specific servers
-      github.enable = true;
-      context7.enable = true;
-
-      # Add custom server
-      myserver = {
-        enable = true;
-        type = "http";
-        url = "http://localhost:3000/mcp";
-      };
-    };
-
-    # Use default agents or override
-    agents = ai-tools-flake.lib.defaultConfig.agents // {
-      # Disable an agent
-      nixos.disable = true;
-
-      # Add custom agent
-      my-agent = {
-        content = ./my-agent.md;
-        description = "My custom agent";
-        tools = [ "Read" "Write" ];
-        model = "sonnet";
-      };
-    };
-
-    # Use default memory or provide custom
-    memory = ai-tools-flake.lib.defaultConfig.memory;
-    # or
-    # memory = ./my-memory.md;
-
-    # Override default extra packages (gh, ripgrep)
-    extraPackages = with pkgs; [
-      gh       # GitHub CLI for ticket-driven-developer agent
-      jq       # JSON processor for data manipulation
-      ripgrep  # Fast search tool
-      nodejs   # For npx-based MCP servers like playwright
-    ];
-
-    enableClaudeCode = true;
-    enableOpencode = true;
-    enableMcphub = false;
-
-    # Claude-flow commands (enabled by default)
-    enableClaudeFlowCommands = true;
-    # Optional: use custom commands directory
-    # commandsDir = ./my-commands;
-  };
-
-  # Install Claude skills manually (until module supports them)
-  home.file.".claude/skills/lint-with-conform".source =
-    "${ai-tools-flake}/config/skills/lint-with-conform";
+  programs.ai-tools.enable = true;
+  
+  # Optional: override package versions
+  programs.opencode.package = inputs.opencode.packages.${pkgs.system}.default;
+  programs.claude-code.package = pkgs.unstable.claude-code;
 }
 ```
 
 ### Claude-Flow Commands
 
-The flake includes 9 pre-configured workflow commands that are automatically configured via upstream home-manager options:
+Automatically installed workflow commands:
 
-- Uses `programs.opencode.commands` for OpenCode
-- Uses `programs.claude-code.commands` for Claude Desktop
-
-Available commands:
-
-- **commit**: Create git commits for changes
+- **commit**: Create git commits
 - **create_plan**: Generate implementation plans
-- **create_spec**: Create feature specifications
+- **create_spec**: Create feature specs
 - **create_ticket**: Generate Jira tickets
 - **create_worktree**: Create git worktrees
 - **implement_plan**: Execute implementation plans
-- **research_codebase**: Document and explain codebases
-- **research_confluence**: Research Confluence documentation
+- **research_codebase**: Document codebases
+- **research_confluence**: Research Confluence docs
 - **validate_plan**: Validate implementation plans
 
-To disable auto-installation:
+Commands automatically configured via:
+- `programs.opencode.commands`
+- `programs.claude-code.commands`
 
-```nix
-programs.ai-tools = {
-  enable = true;
-  enableClaudeFlowCommands = false;
-};
-```
-
-To use custom commands directory:
-
-```nix
-programs.ai-tools = {
-  enable = true;
-  commandsDir = ./my-custom-commands;
-};
-```
-
-**Note**: Users can still add their own commands using the upstream options directly:
-
-```nix
-programs.opencode.commands = ./my-extra-commands;
-programs.claude-code.commands = ./my-extra-commands;
-```
-
-### Using the Overlay
+### Advanced: Direct Package Access
 
 ```nix
 {
-  nixpkgs.overlays = [ ai-tools.overlays.default ];
-
-  # Now opencode wrapper is available in pkgs
-  home.packages = [ pkgs.opencode ];
-}
-```
-
-### Using Packages
-
-```nix
-{
+  # Access packages from the flake directly
   home.packages = [
-    ai-tools.packages.${system}.spec-kit
+    inputs.ai-tools.packages.${system}.opencode
+    inputs.ai-tools.packages.${system}.claude-code
+    inputs.ai-tools.packages.${system}.spec-kit
   ];
 }
+```
+
+### Advanced: Quick Shell (without home-manager)
+
+```bash
+nix develop github:clempat/ai-tools-flake
+# Provides: opencode, claude-code, gh
 ```
 
 ## Structure

@@ -9,13 +9,13 @@
     opencode.url = "github:sst/opencode";
   };
 
-  outputs = inputs@{ flake-parts, ... }:
+  outputs = inputs@{ self, flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
 
       flake = {
-        # Home-manager module
-        homeManagerModules.default = ./modules/ai-tools.nix;
+        # Home-manager module (pass self for package access)
+        homeManagerModules.default = import ./modules/ai-tools.nix self;
 
         # Overlays
         overlays.default = import ./overlays/default.nix { inherit inputs; };
@@ -32,8 +32,10 @@
         packages = {
           spec-kit = pkgs'.callPackage ./pkgs/spec-kit.nix { };
 
-          # Export opencode (from sst/opencode flake - latest dev)
-          opencode = inputs.opencode.packages.${system}.default;
+          # Export opencode (from sst/opencode flake if available, else nixpkgs)
+          opencode = if inputs.opencode ? packages.${system}.default
+            then inputs.opencode.packages.${system}.default
+            else pkgs'.opencode;
 
           # Export claude-code (from unstable nixpkgs)
           claude-code = pkgs'.claude-code;
@@ -43,7 +45,7 @@
         devShells.default = pkgs'.mkShell {
           name = "ai-tools";
           packages = [
-            inputs.opencode.packages.${system}.default
+            self'.packages.opencode
             pkgs'.claude-code
             pkgs'.gh  # Required for ticket-driven-developer agent
           ];
