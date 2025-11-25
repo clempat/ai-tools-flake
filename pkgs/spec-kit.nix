@@ -1,7 +1,4 @@
-{ lib
-, python3Packages
-, fetchFromGitHub
-}:
+{ lib, python3Packages, fetchFromGitHub }:
 
 python3Packages.buildPythonApplication rec {
   pname = "specify-cli";
@@ -11,13 +8,12 @@ python3Packages.buildPythonApplication rec {
   src = fetchFromGitHub {
     owner = "github";
     repo = "spec-kit";
-    rev = "f205fa3b58ab3a409bf0432dbafc9d2713b4b9bb"; # latest main as of 2025-01-19
+    rev =
+      "f205fa3b58ab3a409bf0432dbafc9d2713b4b9bb"; # latest main as of 2025-01-19
     hash = "sha256-h4QPGg7KilfxzkWf1Hrk4bkveapKRkbzeEhioxdx1do=";
   };
 
-  build-system = with python3Packages; [
-    hatchling
-  ];
+  build-system = with python3Packages; [ hatchling ];
 
   dependencies = with python3Packages; [
     typer

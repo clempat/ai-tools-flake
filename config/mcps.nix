@@ -1,8 +1,13 @@
 # Default MCP server configurations (claude-code format)
+# 
+# Claude Desktop Integration:
+# - stdio servers: Auto-configured via claude_desktop_config.json ✓
+# - http servers: Must be added manually via Claude Desktop UI ⚠
+#   (Settings → Connectors → Add custom connector → Enter URL)
 {
   nixos = {
     enable = false; # Per-agent only
-    type = "stdio";
+    type = "stdio"; # ✓ Auto-configured for Claude Desktop
     command = "nix";
     args = [
       "run"
@@ -13,13 +18,13 @@
 
   figma-desktop = {
     enable = false;
-    type = "http";
+    type = "http"; # ⚠ Add manually: http://127.0.0.1:3845/mcp
     url = "http://127.0.0.1:3845/mcp";
   };
 
   atlassian = {
     enable = false;
-    type = "http";
+    type = "http"; # ⚠ Add manually: https://mcp.patout.app/mcp/atlassian
     url = "https://mcp.patout.app/mcp/atlassian";
     headers = {
       Authorization = "Bearer wH0wuvH41jffjE1aFO7qlcl0OX7TtvWj";
@@ -73,7 +78,7 @@
 
   playwright = {
     enable = false;
-    type = "stdio";
+    type = "stdio"; # ✓ Auto-configured for Claude Desktop
     command = "npx";
     args = [
       "@playwright/mcp@latest "
@@ -83,7 +88,7 @@
 
   context7 = {
     enable = true; # Enabled globally for all agents
-    type = "http";
+    type = "http"; # ⚠ Add manually: https://mcp.patout.app/mcp/context7
     url = "https://mcp.patout.app/mcp/context7";
     headers = {
       Authorization = "Bearer wH0wuvH41jffjE1aFO7qlcl0OX7TtvWj";

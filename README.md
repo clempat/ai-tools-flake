@@ -86,6 +86,58 @@ The module automatically uses packages from the flake. To override:
 }
 ```
 
+### Claude Desktop Configuration (macOS)
+
+On macOS, the module automatically configures Claude Desktop by generating `~/Library/Application Support/Claude/claude_desktop_config.json`.
+
+**What's Auto-Configured:**
+- ✅ **stdio MCP servers** (nixos, playwright) are automatically added to the config file
+- ✅ **HTTP MCP servers** via the **mcp-gateway** proxy (NEW!)
+
+**MCP Gateway (Automatic HTTP Support)**
+
+The flake includes an `mcp-gateway` package that acts as a stdio→HTTP proxy, allowing ALL your HTTP MCP servers to work with Claude Desktop automatically!
+
+**How it works:**
+1. The gateway runs as a stdio MCP server (Claude Desktop compatible)
+2. It proxies requests to your HTTP MCP servers (atlassian, github, context7, etc.)
+3. All HTTP servers appear as tools in Claude Desktop
+
+**Generated config:**
+```json
+{
+  "mcpServers": {
+    "gateway": {
+      "command": "/nix/store/.../bin/mcp-gateway",
+      "env": {
+        "MCP_GATEWAY_CONFIG": "~/.config/mcp-gateway/config.json"
+      }
+    },
+    "nixos": {
+      "command": "nix",
+      "args": ["run", "github:utensils/mcp-nixos", "--"]
+    }
+  }
+}
+```
+
+The gateway config (`~/.config/mcp-gateway/config.json`) is automatically generated from your `config/mcps.nix` HTTP servers.
+
+**Alternative: Manual Configuration**
+
+If you prefer manual configuration or the gateway doesn't work:
+
+1. Open Claude Desktop → **Settings → Connectors**
+2. Click **"Add custom connector"**
+3. Enter server URLs from `config/mcps.nix`
+4. Configure OAuth authentication if needed
+
+**Technical Details:**
+
+- Gateway uses [multi-mcp](https://github.com/kfirtoledo/multi-mcp) (Python-based)
+- Packaged as a Nix derivation with all dependencies
+- Config auto-generated from enabled HTTP servers in `config/mcps.nix`
+
 ### Claude-Flow Commands
 
 Automatically installed workflow commands:
