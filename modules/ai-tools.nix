@@ -11,6 +11,7 @@ in {
   imports = [
     ./opencode.nix
     ./claude-code.nix
+    ./claude-desktop.nix
   ];
 
   options.programs.ai-tools = {

@@ -1,14 +1,20 @@
 # Default MCP server configurations (claude-code format)
 # 
 # Claude Desktop Integration:
-# - stdio servers: Auto-configured via claude_desktop_config.json ✓
-# - http servers: Must be added manually via Claude Desktop UI ⚠
-#   (Settings → Connectors → Add custom connector → Enter URL)
+# - ALL servers included in claude_desktop_config.json (regardless of enable flag)
+# - stdio servers: Direct stdio connection ✓
+# - http servers: Via mcp-proxy (as stdio) ✓
+# - Toggle servers on/off manually in Claude Desktop UI
+# 
+# OpenCode Integration:
+# - ALL servers included in config.json
+# - enable = false → Disabled via tools section (lazy loading)
+# - enable = true → Enabled and active
 {
   nixos = {
     enable = false; # Per-agent only
     type = "stdio"; # ✓ Auto-configured for Claude Desktop
-    command = "nix";
+    command = "/run/current-system/sw/bin/nix";
     args = [
       "run"
       "github:utensils/mcp-nixos"
