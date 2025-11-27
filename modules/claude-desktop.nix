@@ -10,38 +10,47 @@ let
   # Hardcoded personal configuration
   personalMcpServers = import ../config/mcps.nix;
 
+  # Capture PATH from the shell at evaluation time (when home-manager switch runs)
+  # This ensures Claude Desktop MCP servers have access to the same binaries as your terminal
+  # See: https://emmanuelbernard.com/blog/2025/04/07/mcp-servers-and-claude-desktop-path/
+  defaultMcpPath = builtins.getEnv "PATH";
+
   # Transform MCP server for Claude Desktop
   # IMPORTANT: claude_desktop_config.json ONLY supports stdio servers
   # HTTP/remote servers must be added manually via Claude Desktop UI:
   # Settings → Connectors → Add custom connector
   transformMcpForClaudeDesktop = name: server:
     if server.type == "stdio" then
-      {
+      let
+        # Merge default PATH with any existing env from server config
+        defaultEnv = { PATH = defaultMcpPath; };
+        serverEnv = server.env or { };
+        mergedEnv = defaultEnv // serverEnv;
+      in {
         command = server.command;
         args = server.args;
-      } // lib.optionalAttrs (server ? env) { env = server.env; }
+        env = mergedEnv;
+      }
     else
     # Skip non-stdio servers (they require manual UI configuration)
       null;
 
   # Get ALL HTTP MCP servers
-  httpMcpServers = lib.filterAttrs
-    (name: server: server.type == "http")
-    personalMcpServers;
+  httpMcpServers =
+    lib.filterAttrs (name: server: server.type == "http") personalMcpServers;
 
   # Transform HTTP servers to use mcp-proxy for stdio connection
   httpServersViaProxy = lib.mapAttrs (name: server:
     let
       # Convert headers to mcp-proxy --headers arguments
-      headerArgs = lib.flatten (lib.mapAttrsToList
-        (key: value: [ "--headers" key value ])
-        (server.headers or { }));
-    in
-    {
+      headerArgs = lib.flatten
+        (lib.mapAttrsToList (key: value: [ "--headers" key value ])
+          (server.headers or { }));
+    in {
       command = "${pkgs.mcp-proxy}/bin/mcp-proxy";
       args = [ "--transport" "streamablehttp" ] ++ headerArgs ++ [ server.url ];
-    }
-  ) httpMcpServers;
+      env = { PATH = defaultMcpPath; };
+    }) httpMcpServers;
 
   # Generate Claude Desktop config JSON (stdio servers + HTTP via proxy)
   stdioServers = lib.filterAttrs (name: config: config != null)
@@ -61,8 +70,9 @@ in {
     home.packages = mkIf (httpMcpServers != { }) [ pkgs.mcp-proxy ];
 
     # Generate Claude Desktop config
-    home.file."Library/Application Support/Claude/claude_desktop_config.json" = {
-      text = builtins.toJSON claudeDesktopConfig;
-    };
+    home.file."Library/Application Support/Claude/claude_desktop_config.json" =
+      {
+        text = builtins.toJSON claudeDesktopConfig;
+      };
   };
 }

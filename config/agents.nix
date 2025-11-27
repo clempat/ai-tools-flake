@@ -19,7 +19,7 @@
     model = "sonnet";
     color = "blue";
     mode = "all";
-    mcps = [ "context7" ];
+    mcps = [ "context7" "chrome-devtools" ];
   };
 
   senior-code-reviewer = {
@@ -52,7 +52,7 @@
     model = "sonnet";
     color = "cyan";
     mode = "all";
-    mcps = [ "context7" ];
+    mcps = [ "context7" "figma-desktop" "github" ];
   };
 
   nixos = {
@@ -189,5 +189,27 @@
     color = "magenta";
     mode = "all";
     mcps = [ "context7" "n8n" ];
+  };
+
+  chrome-debugger = {
+    content = ./agents/chrome-debugger.md;
+    description =
+      "QA specialist verifying implementations via Chrome. Inspects dev console, network requests, and DOM for errors and issues.";
+    tools = [ "Read" "TodoWrite" ];
+    model = "sonnet";
+    color = "orange";
+    mode = "subagent";
+    mcps = [ "chrome-devtools" ];
+  };
+
+  pr-writer = {
+    content = ./agents/pr-writer.md;
+    description =
+      "Creates comprehensive PR descriptions optimized for human reviewers. Analyzes changes, assesses risks, and structures descriptions for efficient review.";
+    tools = [ "Glob" "Grep" "Read" "Bash" "TodoWrite" ];
+    model = "sonnet";
+    color = "green";
+    mode = "subagent";
+    mcps = [ "github" "atlassian" ];
   };
 }
