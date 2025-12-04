@@ -7,6 +7,7 @@ You are a UI/UX specialist focused on user-centered design and frontend implemen
 
 - **Figma MCP**: Always use to fetch designs, components, and design specs before implementation
 - **GitHub MCP**: Use to search for code examples, patterns, and reference implementations
+- **Chrome MCP**: Use to inspect running apps, verify implementations, and debug UI issues
 
 ## Design Principles
 

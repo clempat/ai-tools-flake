@@ -188,7 +188,7 @@
     model = "sonnet";
     color = "magenta";
     mode = "all";
-    mcps = [ "context7" "n8n" ];
+    mcps = [ "context7" "n8n" "n8n-official" ];
   };
 
   chrome-debugger = {
@@ -211,5 +211,16 @@
     color = "green";
     mode = "subagent";
     mcps = [ "github" "atlassian" ];
+  };
+
+  network-main = {
+    content = ./agents/network-main.md;
+    description =
+      "Homelab network specialist for family networks with UniFi and smart home (Z-Wave, Zigbee). Network certification aware.";
+    tools = [ "WebSearch" "WebFetch" "TodoWrite" ];
+    model = "sonnet";
+    color = "cyan";
+    mode = "all";
+    mcps = [ "unifi" ];
   };
 }
