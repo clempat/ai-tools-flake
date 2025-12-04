@@ -223,4 +223,15 @@
     mode = "all";
     mcps = [ "unifi" ];
   };
+
+  productivity-coach = {
+    content = ./agents/productivity-coach.md;
+    description =
+      "Productivity expert with GTD, Atomic Habits, Deep Work, and 15+ methodology knowledge. Creates optimized Todoist tasks.";
+    tools = [ "WebSearch" "WebFetch" "TodoWrite" ];
+    model = "sonnet";
+    color = "lime";
+    mode = "all";
+    mcps = [ "todoist" ];
+  };
 }
