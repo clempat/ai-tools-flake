@@ -234,4 +234,15 @@
     mode = "all";
     mcps = [ "todoist" ];
   };
+
+  youtube-researcher = {
+    content = ./agents/youtube-researcher.md;
+    description =
+      "YouTube video researcher. Extracts transcripts, analyzes content, searches videos, and answers questions about video content.";
+    tools = [ "Read" "TodoWrite" "WebFetch" ];
+    model = "sonnet";
+    color = "red";
+    mode = "subagent";
+    mcps = [ "youtube-transcript" "youtube" ];
+  };
 }

@@ -89,9 +89,23 @@
   };
 
   unifi = {
-    enable = true;
+    enable = false;
     type = "http";
     url = "https://mcp.patout.app/mcp/unifi";
+    headers = { Authorization = "Bearer wH0wuvH41jffjE1aFO7qlcl0OX7TtvWj"; };
+  };
+
+  youtube-transcript = {
+    enable = false;
+    type = "http";
+    url = "https://mcp.patout.app/mcp/youtube-transcript";
+    headers = { Authorization = "Bearer wH0wuvH41jffjE1aFO7qlcl0OX7TtvWj"; };
+  };
+
+  youtube = {
+    enable = false;
+    type = "http";
+    url = "https://mcp.patout.app/mcp/youtube";
     headers = { Authorization = "Bearer wH0wuvH41jffjE1aFO7qlcl0OX7TtvWj"; };
   };
 }
