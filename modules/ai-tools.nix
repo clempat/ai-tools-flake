@@ -17,4 +17,9 @@ in {
   options.programs.ai-tools = {
     enable = mkEnableOption "unified AI tools configuration";
   };
+
+  config = mkIf cfg.enable {
+    # Install beads (bd) - git-backed issue tracker for AI agents
+    home.packages = [ pkgs.beads ];
+  };
 }

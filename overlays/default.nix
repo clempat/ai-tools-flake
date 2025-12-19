@@ -1,17 +1,15 @@
 { inputs }:
 final: prev:
-let
-  # Always use this flake's nixpkgs (unstable) - ignores follows
-  unstable = import inputs.nixpkgs {
-    inherit (final) system;
-    config.allowUnfree = true;
-  };
-in {
-  # Custom packages
+{
+  # Custom packages - use consuming flake's nixpkgs
   spec-kit = final.callPackage ../pkgs/spec-kit.nix { };
+  beads = final.callPackage ../pkgs/beads.nix { };
 
-  # All packages from this flake's unstable nixpkgs
-  opencode = inputs.opencode.packages.${final.system}.default or unstable.opencode;
-  mcp-proxy = unstable.mcp-proxy;
-  claude-code = unstable.claude-code;
+  # Packages from other flakes - prefer consuming flake's versions
+  opencode = inputs.opencode.packages.${final.system}.default or prev.opencode;
+  
+  # Use packages from consuming flake's nixpkgs (respects their version choice)
+  # These are available in nixpkgs unstable
+  mcp-proxy = prev.mcp-proxy;
+  claude-code = prev.claude-code;
 }

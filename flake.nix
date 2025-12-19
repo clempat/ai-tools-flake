@@ -32,7 +32,7 @@
         };
 
         # Packages from overlay
-        packages = { inherit (pkgs) spec-kit opencode; };
+        packages = { inherit (pkgs) spec-kit beads opencode; };
 
         # Quick AI shell (without home-manager)
         devShells.default = pkgs.mkShell {
@@ -40,11 +40,12 @@
           packages = [
             pkgs.opencode
             pkgs.claude-code
+            pkgs.beads
             pkgs.gh # Required for ticket-driven-developer agent
           ];
 
           shellHook = ''
-            echo "AI Tools: opencode, claude-code, gh"
+            echo "AI Tools: opencode, claude-code, beads (bd), gh"
             echo "For full config: use homeManagerModules.default"
           '';
         };
