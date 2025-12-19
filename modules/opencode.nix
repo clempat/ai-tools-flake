@@ -14,10 +14,12 @@ let
 
   # Transform MCP server for opencode
   # Remove 'enable' field - we control availability via tools section
+  # Add oauth = false for HTTP MCPs with headers (v1.0.137+ auto-enables OAuth)
   transformMcpForOpencode = name: server:
     let baseServer = builtins.removeAttrs server [ "enable" ];
     in if baseServer.type == "http" then
       (builtins.removeAttrs baseServer [ "type" ]) // { type = "remote"; }
+        // (if baseServer ? headers then { oauth = false; } else { })
     else if baseServer.type == "stdio" then
       let
         withoutOldFields =

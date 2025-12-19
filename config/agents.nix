@@ -188,7 +188,7 @@
     model = "sonnet";
     color = "magenta";
     mode = "all";
-    mcps = [ "context7" "n8n" ];
+    mcps = [ "context7" "n8n" "n8n-official" ];
   };
 
   chrome-debugger = {
@@ -211,5 +211,38 @@
     color = "green";
     mode = "subagent";
     mcps = [ "github" "atlassian" ];
+  };
+
+  network-main = {
+    content = ./agents/network-main.md;
+    description =
+      "Homelab network specialist for family networks with UniFi and smart home (Z-Wave, Zigbee). Network certification aware.";
+    tools = [ "WebSearch" "WebFetch" "TodoWrite" ];
+    model = "sonnet";
+    color = "cyan";
+    mode = "all";
+    mcps = [ "unifi" ];
+  };
+
+  productivity-coach = {
+    content = ./agents/productivity-coach.md;
+    description =
+      "Productivity expert with GTD, Atomic Habits, Deep Work, and 15+ methodology knowledge. Creates optimized Todoist tasks.";
+    tools = [ "WebSearch" "WebFetch" "TodoWrite" ];
+    model = "sonnet";
+    color = "lime";
+    mode = "all";
+    mcps = [ "todoist" ];
+  };
+
+  youtube-researcher = {
+    content = ./agents/youtube-researcher.md;
+    description =
+      "YouTube video researcher. Extracts transcripts, analyzes content, searches videos, and answers questions about video content.";
+    tools = [ "Read" "TodoWrite" "WebFetch" ];
+    model = "sonnet";
+    color = "red";
+    mode = "subagent";
+    mcps = [ "youtube-transcript" "youtube" ];
   };
 }

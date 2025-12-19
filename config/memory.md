@@ -4,6 +4,10 @@
 
 - When creating a new branch, prefix it with cpatout/
 
+# GitHub
+
+- When given GitHub URLs (PRs, issues, repos, etc.), use `gh` CLI instead of web fetching
+
 # Generate Clarification Questions
 
 ## Create structured questions organized by priority:

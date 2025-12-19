@@ -13,7 +13,7 @@ let
   # Capture PATH from the shell at evaluation time (when home-manager switch runs)
   # This ensures Claude Desktop MCP servers have access to the same binaries as your terminal
   # See: https://emmanuelbernard.com/blog/2025/04/07/mcp-servers-and-claude-desktop-path/
-  defaultMcpPath = builtins.getEnv "PATH";
+  defaultMcpPath = "/run/current-system/sw/bin:$PATH"; # builtins.getEnv "PATH";
 
   # Transform MCP server for Claude Desktop
   # IMPORTANT: claude_desktop_config.json ONLY supports stdio servers
