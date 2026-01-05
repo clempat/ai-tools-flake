@@ -8,7 +8,7 @@ let
   shared = import ./ai-tools-shared.nix { inherit lib pkgs; };
 
   # Hardcoded personal configuration
-  personalMcpServers = import ../config/mcps.nix;
+  personalMcpServers = import ../config/mcps.nix { inherit pkgs lib; };
   personalAgents = import ../config/agents.nix;
   personalMemory = ../config/memory.md;
 

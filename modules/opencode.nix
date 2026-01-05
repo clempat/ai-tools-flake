@@ -8,7 +8,7 @@ let
   shared = import ./ai-tools-shared.nix { inherit lib pkgs; };
 
   # Hardcoded personal configuration
-  personalMcpServers = import ../config/mcps.nix;
+  personalMcpServers = import ../config/mcps.nix { inherit pkgs lib; };
   personalAgents = import ../config/agents.nix;
   personalMemory = ../config/memory.md;
 
@@ -18,8 +18,9 @@ let
   transformMcpForOpencode = name: server:
     let baseServer = builtins.removeAttrs server [ "enable" ];
     in if baseServer.type == "http" then
-      (builtins.removeAttrs baseServer [ "type" ]) // { type = "remote"; }
-        // (if baseServer ? headers then { oauth = false; } else { })
+      (builtins.removeAttrs baseServer [ "type" ]) // {
+        type = "remote";
+      } // (if baseServer ? headers then { oauth = false; } else { })
     else if baseServer.type == "stdio" then
       let
         withoutOldFields =

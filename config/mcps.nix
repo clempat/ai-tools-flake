@@ -11,7 +11,7 @@
 # - ALL servers included in config.json
 # - enable = false → Disabled via tools section (lazy loading)
 # - enable = true → Enabled and active
-{
+{ pkgs, ... }: {
   nixos = {
     enable = false;
     type = "stdio";
@@ -84,8 +84,9 @@
   chrome-devtools = {
     enable = false;
     type = "stdio";
-    command = "npx";
+    command = "${pkgs.nodejs}/bin/npx";
     args = [ "-y" "chrome-devtools-mcp@latest" ];
+    env = { PATH = "${pkgs.nodejs}/bin:/run/current-system/sw/bin"; };
   };
 
   unifi = {
