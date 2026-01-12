@@ -7,7 +7,7 @@
 
     flake-parts.url = "github:hercules-ci/flake-parts";
 
-    opencode.url = "github:sst/opencode";
+    opencode.url = "github:happycastle114/opencode/patch-2";
   };
 
   outputs = inputs@{ self, flake-parts, ... }:
