@@ -1,6 +1,5 @@
 { inputs }:
-final: prev:
-{
+final: prev: {
   # Fix broken mcp package - upstream removed time.sleep(0.1) from test_integration.py
   # TODO: Remove this override once nixpkgs-unstable includes commit fa82e35
   python3Packages = prev.python3Packages.overrideScope (pyFinal: pyPrev: {
@@ -18,7 +17,7 @@ final: prev:
 
   # Packages from other flakes - prefer consuming flake's versions
   opencode = inputs.opencode.packages.${final.system}.default or prev.opencode;
-  
+
   # Use packages from consuming flake's nixpkgs (respects their version choice)
   # These are available in nixpkgs unstable
   mcp-proxy = prev.mcp-proxy;
