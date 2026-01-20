@@ -11,7 +11,7 @@
 # - ALL servers included in config.json
 # - enable = false → Disabled via tools section (lazy loading)
 # - enable = true → Enabled and active
-{ pkgs, ... }: {
+{
   nixos = {
     enable = false;
     type = "stdio";
@@ -84,9 +84,8 @@
   chrome-devtools = {
     enable = false;
     type = "stdio";
-    command = "${pkgs.nodejs}/bin/npx";
+    command = "npx";
     args = [ "-y" "chrome-devtools-mcp@latest" ];
-    env = { PATH = "${pkgs.nodejs}/bin:/run/current-system/sw/bin"; };
   };
 
   unifi = {
@@ -108,5 +107,13 @@
     type = "http";
     url = "https://mcp.patout.app/mcp/youtube";
     headers = { Authorization = "Bearer wH0wuvH41jffjE1aFO7qlcl0OX7TtvWj"; };
+  };
+
+  beads = {
+    enable = true; # Can be overridden by ai-tools.beads.enable
+    type = "stdio";
+    command = "uv";
+    args = [ "run" "--with" "beads-mcp" "beads-mcp" ];
+    env = { };
   };
 }

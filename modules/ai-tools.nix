@@ -4,35 +4,55 @@
 
 with lib;
 
-let cfg = config.programs.ai-tools;
+let
+  cfg = config.programs.ai-tools;
 
 in {
-  imports = [ ./opencode.nix ./claude-code.nix ./claude-desktop.nix ];
+  imports = [
+    ./opencode.nix
+    ./claude-code.nix
+    ./claude-desktop.nix
+  ];
 
   options.programs.ai-tools = {
     enable = mkEnableOption "unified AI tools configuration";
-    ollama = {
+    
+    beads = {
       enable = mkOption {
         type = types.bool;
         default = true;
-        description = "Whether to enable Ollama service";
+        description = "Enable beads issue tracker integration";
       };
-      acceleration = mkOption {
-        type = types.nullOr (types.enum [ false "rocm" "cuda" ]);
-        default = null;
-        description = "What interface to use for hardware acceleration";
+      
+      ui = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Enable bdui TUI for beads issue tracker";
+      };
+      
+      hooks = {
+        enable = mkOption {
+          type = types.bool;
+          default = true;
+          description = "Enable beads hooks for Claude Code (SessionStart, PreCompact)";
+        };
+        
+        stealth = mkOption {
+          type = types.bool;
+          default = false;
+          description = "Use stealth mode for beads hooks (no git operations)";
+        };
       };
     };
   };
 
   config = mkIf cfg.enable {
     # Install beads (bd) - git-backed issue tracker for AI agents
-    home.packages = [ pkgs.beads ];
-
-    services.ollama = mkIf (cfg.ollama.enable && !pkgs.stdenv.isDarwin) {
-      inherit acceleration;
-      enable = true;
-      environmentVariables = { OLLAMA_CONTEXT_LENGTH = "32768"; };
-    };
+    # Install uv - Python package manager needed for beads-mcp
+    # Install bdui - TUI for beads issue tracker
+    home.packages = with pkgs; mkMerge [
+      (mkIf cfg.beads.enable [ beads uv ])
+      (mkIf (cfg.beads.enable && cfg.beads.ui) [ bdui ])
+    ];
   };
 }

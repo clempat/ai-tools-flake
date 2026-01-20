@@ -22,17 +22,20 @@ This means you should automatically use the Context7 MCP tools to resolve librar
 # NixOS Command Not Found Handler
 
 When a bash command fails with "command not found" error patterns:
+
 - `command not found: <cmd>`
 - `<cmd>: No such file or directory`
 - `zsh: command not found: <cmd>`
 - `bash: <cmd>: command not found`
 
-Automatically delegate to the **nixos** agent with this prompt:
+It should suggest a `nix shell nixpkgs#<package> -c ...` You should use.
+
+If you get no suggestion automatically delegate to the **nixos** agent with this prompt:
+
 ```
 The command '<original-command>' failed with 'command not found'. Please:
-1. Search for the NixOS package that provides this command
-2. Run the command using 'nix shell nixpkgs#<package> -c <original-command>'
-3. Return the actual command output/result
+1. search the package which could bring this command
+2. return the `nix shell nixpkgs#` I should use. saying something like `use ...`
 ```
 
 Exclude: single letters, shell builtins (cd, export), obvious typos (sl, gerp).
