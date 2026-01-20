@@ -96,5 +96,5 @@ The query uses string interpolation without sanitization.
 ## Notes
 
 - For large PRs, focus on most critical files first
-- Use context7 to verify library usage patterns
+- Use refs.tool to verify library usage patterns
 - Cross-reference with project conventions if available

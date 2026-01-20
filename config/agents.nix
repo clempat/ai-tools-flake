@@ -19,7 +19,7 @@
     model = "sonnet";
     color = "blue";
     mode = "all";
-    mcps = [ "context7" "chrome-devtools" ];
+    mcps = [ "refs" "chrome-devtools" ];
   };
 
   senior-code-reviewer = {
@@ -30,7 +30,7 @@
     model = "sonnet";
     color = "purple";
     mode = "subagent";
-    mcps = [ "context7" "github" ];
+    mcps = [ "refs" "github" ];
   };
 
   ui-engineer = {
@@ -52,7 +52,7 @@
     model = "sonnet";
     color = "cyan";
     mode = "all";
-    mcps = [ "context7" "figma-desktop" "github" ];
+    mcps = [ "refs" "figma-desktop" "github" ];
   };
 
   nixos = {
@@ -86,7 +86,7 @@
     color = "yellow";
     mode = "all";
     temperature = 0.2;
-    mcps = [ "atlassian" "figma-desktop" "brave-search" "context7" ];
+    mcps = [ "atlassian" "figma-desktop" "brave-search" "refs" ];
   };
 
   confluence-researcher = {
@@ -188,7 +188,7 @@
     model = "sonnet";
     color = "magenta";
     mode = "all";
-    mcps = [ "context7" "n8n" "n8n-official" ];
+    mcps = [ "refs" "n8n" "n8n-official" ];
   };
 
   chrome-debugger = {

@@ -47,6 +47,7 @@
               spec-kit
               beads
               bdui
+              agent-browser
               opencode
               opencode-beads
               opencode-skills
@@ -64,11 +65,12 @@
               pkgs.claude-code
               pkgs.beads
               pkgs.bdui
+              pkgs.agent-browser
               pkgs.gh # Required for ticket-driven-developer agent
             ];
 
             shellHook = ''
-              echo "AI Tools: opencode, claude-code, beads (bd), bdui, gh"
+              echo "AI Tools: opencode, claude-code, beads (bd), bdui, agent-browser, gh"
               echo "For full config: use homeManagerModules.default"
             '';
           };

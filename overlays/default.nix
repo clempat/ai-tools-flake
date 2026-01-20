@@ -5,6 +5,7 @@ final: prev:
   spec-kit = final.callPackage ../pkgs/spec-kit.nix { };
   beads = final.callPackage ../pkgs/beads.nix { };
   bdui = final.callPackage ../pkgs/bdui.nix { };
+  agent-browser = final.callPackage ../pkgs/agent-browser.nix { };
   
   # OpenCode plugins
   opencode-beads = final.callPackage ../pkgs/opencode-beads.nix { };

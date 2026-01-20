@@ -227,7 +227,7 @@ ai-tools-flake/
 - **n8n**: n8n workflow automation
 - **todoist**: Todoist task management
 - **playwright**: Browser automation
-- **context7**: Context7 documentation
+- **refs**: refs.tool documentation
 
 ## Available Skills
 

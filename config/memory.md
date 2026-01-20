@@ -16,8 +16,8 @@ Critical: Questions that block development
 Important: Questions that affect design & architecture
 Clarifying: Questions that improve quality
 
-Always use context7 when I need code generation, setup or configuration steps, or library/API documentation.
-This means you should automatically use the Context7 MCP tools to resolve library id and get library docs without me having to explicitly ask.
+Always use refs.tool when I need code generation, setup or configuration steps, or library/API documentation.
+Use ref_search_documentation to search docs (web, github, private repos, pdfs), then ref_read_url to read content.
 
 # NixOS Command Not Found Handler
 

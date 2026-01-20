@@ -74,10 +74,10 @@
     headers = { Authorization = "Bearer wH0wuvH41jffjE1aFO7qlcl0OX7TtvWj"; };
   };
 
-  context7 = {
+  refs = {
     enable = true;
     type = "http";
-    url = "https://mcp.patout.app/mcp/context7";
+    url = "https://mcp.patout.app/mcp/refs";
     headers = { Authorization = "Bearer wH0wuvH41jffjE1aFO7qlcl0OX7TtvWj"; };
   };
 

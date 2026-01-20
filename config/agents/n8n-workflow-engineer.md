@@ -197,7 +197,7 @@ return items;
 
 ## Important Notes
 
-- Use context7 MCP for n8n API documentation and examples
+- Use refs.tool for n8n API documentation and examples
 - Always include Error Trigger workflow for production use
 - Test with sample data before deploying to production
 - Consider rate limits when integrating external APIs
