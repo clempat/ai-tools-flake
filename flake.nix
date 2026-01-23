@@ -54,6 +54,10 @@
               opencode-gemini-auth
               opencode-dcp
               opencode-md-table-formatter
+              opencode-antigravity-auth
+              opencode-codex-auth
+              opencode-notifier
+              opencode-websearch-cited
               ;
           };
 

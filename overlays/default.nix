@@ -13,6 +13,10 @@ final: prev:
   opencode-gemini-auth = final.callPackage ../pkgs/opencode-gemini-auth.nix { };
   opencode-dcp = final.callPackage ../pkgs/opencode-dcp.nix { };
   opencode-md-table-formatter = final.callPackage ../pkgs/opencode-md-table-formatter.nix { };
+  opencode-antigravity-auth = final.callPackage ../pkgs/opencode-antigravity-auth.nix { };
+  opencode-codex-auth = final.callPackage ../pkgs/opencode-codex-auth.nix { };
+  opencode-notifier = final.callPackage ../pkgs/opencode-notifier.nix { };
+  opencode-websearch-cited = final.callPackage ../pkgs/opencode-websearch-cited.nix { };
 
   # Packages from other flakes - prefer consuming flake's versions
   opencode = inputs.opencode.packages.${final.system}.default or prev.opencode;

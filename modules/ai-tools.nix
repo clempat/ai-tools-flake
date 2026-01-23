@@ -1,13 +1,19 @@
 # Unified AI tools configuration module
 # Orchestrates opencode, claude-code, and claude-desktop configurations
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
 let
   cfg = config.programs.ai-tools;
 
-in {
+in
+{
   imports = [
     ./opencode.nix
     ./claude-code.nix
@@ -16,27 +22,51 @@ in {
 
   options.programs.ai-tools = {
     enable = mkEnableOption "unified AI tools configuration";
-    
+    codex = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Whether to enable Codex service";
+      };
+    };
+    ollama = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Whether to enable Ollama service";
+      };
+      acceleration = mkOption {
+        type = types.nullOr (
+          types.enum [
+            false
+            "rocm"
+            "cuda"
+          ]
+        );
+        default = null;
+        description = "What interface to use for hardware acceleration";
+      };
+    };
     beads = {
       enable = mkOption {
         type = types.bool;
         default = true;
         description = "Enable beads issue tracker integration";
       };
-      
+
       ui = mkOption {
         type = types.bool;
         default = true;
         description = "Enable bdui TUI for beads issue tracker";
       };
-      
+
       hooks = {
         enable = mkOption {
           type = types.bool;
           default = true;
           description = "Enable beads hooks for Claude Code (SessionStart, PreCompact)";
         };
-        
+
         stealth = mkOption {
           type = types.bool;
           default = false;
@@ -54,5 +84,15 @@ in {
       (mkIf cfg.beads.enable [ beads uv ])
       (mkIf (cfg.beads.enable && cfg.beads.ui) [ bdui ])
     ];
+
+    programs.codex.enable = cfg.codex.enable;
+
+    services.ollama = mkIf (cfg.ollama.enable && !pkgs.stdenv.isDarwin) {
+      inherit (cfg.ollama) acceleration;
+      enable = true;
+      environmentVariables = {
+        OLLAMA_CONTEXT_LENGTH = "32768";
+      };
+    };
   };
 }
