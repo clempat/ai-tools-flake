@@ -29,6 +29,10 @@ let
       };
     });
 
+  enabledMcpList = lib.attrNames (
+    lib.filterAttrs (name: server: server.enable or false) personalMcpServers
+  );
+
   # Generate list of disabled MCP servers for claude-code settings
   disabledMcpServers = lib.attrNames (
     lib.filterAttrs (name: server: !(server.enable or false)) personalMcpServers
@@ -42,17 +46,21 @@ let
     name: agent:
     let
       # Merge base tools with MCP tools from mcps list
-      allTools =
-        (agent.tools or [ ])
+      mcpList =
+        enabledMcpList
         ++ (
           if (agent.mcps or null) != null then
-            mcpListToClaudeTools agent.mcps
+            agent.mcps
           else if (agent.opencodeTools or null) != null then
             # Backward compat: convert old opencodeTools format
-            map (pattern: "mcp__${lib.removeSuffix "*" pattern}") (lib.attrNames agent.opencodeTools)
+            map (pattern: lib.removeSuffix "*" pattern) (lib.attrNames agent.opencodeTools)
           else
             [ ]
         );
+
+      allTools =
+        (agent.tools or [ ])
+        ++ mcpListToClaudeTools (lib.unique mcpList);
 
       fields = lib.optionals (!(agent.disable or false)) (
         [

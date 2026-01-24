@@ -22,6 +22,23 @@ in
 
   options.programs.ai-tools = {
     enable = mkEnableOption "unified AI tools configuration";
+    opencode = {
+      plugins = mkOption {
+        type = types.listOf types.str;
+        default = [
+          "opencode-beads@0.4.0"
+          "opencode-gemini-auth@1.3.8"
+          "@tarquinen/opencode-dcp@1.2.7"
+          "@franlol/opencode-md-table-formatter@0.0.3"
+          "opencode-antigravity-auth@1.3.1"
+          "opencode-openai-codex-auth@4.4.0"
+          "@mohak34/opencode-notifier@0.1.15"
+          "opencode-websearch-cited@1.2.0"
+          "@simonwjackson/opencode-direnv@2025.1211.9"
+        ];
+        description = "OpenCode npm plugins (name@version).";
+      };
+    };
     codex = {
       enable = mkOption {
         type = types.bool;
@@ -80,10 +97,15 @@ in
     # Install beads (bd) - git-backed issue tracker for AI agents
     # Install uv - Python package manager needed for beads-mcp
     # Install bdui - TUI for beads issue tracker
-    home.packages = with pkgs; mkMerge [
-      (mkIf cfg.beads.enable [ beads uv ])
-      (mkIf (cfg.beads.enable && cfg.beads.ui) [ bdui ])
-    ];
+    home.packages =
+      with pkgs;
+      mkMerge [
+        (mkIf cfg.beads.enable [
+          beads
+          uv
+        ])
+        (mkIf (cfg.beads.enable && cfg.beads.ui) [ bdui ])
+      ];
 
     programs.codex.enable = cfg.codex.enable;
 

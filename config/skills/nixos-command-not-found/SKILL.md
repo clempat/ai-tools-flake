@@ -18,8 +18,10 @@ Activate this skill when:
 
 1. **Detect NixOS environment**: Check for `/etc/nixos` or `NIX_STORE` env var
 2. **Extract command name**: Get the missing command from error output
-3. **Delegate everything to nixos agent**: Agent finds package AND runs command
-4. **Return command output**: Agent provides the actual command result
+3. **If error output already suggests a nix shell**: Run that exact command
+4. **Else search locally**: Use `nix search nixpkgs <cmd>` and pick best match
+5. **Run via nix shell**: `nix shell nixpkgs#<package> -c <original-command>`
+6. **Delegate only if needed**: If no match or ambiguous, delegate to nixos agent
 
 ## Implementation Steps
 
@@ -29,21 +31,26 @@ Check if we're in NixOS:
 test -d /etc/nixos || test -n "$NIX_STORE"
 ```
 
-### 2. Delegate Complete Task
-Use Task tool with nixos agent to handle everything:
+### 2. Use Suggested nix shell (if present)
+If the error output already includes a recommended `nix shell nixpkgs#... -c ...`, run it as-is.
+
+### 3. Local Search + Run
+Search locally and pick best match from plain text output:
+```bash
+nix search nixpkgs <cmd>
 ```
-Task(
-  description="Run missing command with nix shell",
-  prompt="The command '<original-command>' failed with 'command not found'. Please:
-1. Search for the NixOS package that provides this command
-2. Run the command using 'nix shell nixpkgs#<package> -c <original-command>'
-3. Return the actual command output/result",
-  subagent_type="nixos"
-)
+Selection order:
+1. Exact attr path equals cmd
+2. Attr path contains cmd
+3. Description contains cmd
+
+Then run:
+```bash
+nix shell nixpkgs#<package> -c <original-command>
 ```
 
-### 3. Return Results
-The nixos agent returns the actual command execution result, not just package info.
+### 4. Delegate When Needed
+If no match or too many ambiguous results, delegate to nixos agent to resolve.
 
 ## Examples
 
@@ -51,31 +58,33 @@ The nixos agent returns the actual command execution result, not just package in
 1. User runs: `tree /some/path`
 2. Error: `zsh: command not found: tree`
 3. Detect NixOS environment ✓
-4. Delegate to nixos agent: "Run 'tree /some/path' with nix shell"
-5. Agent finds `tree` package, runs `nix shell nixpkgs#tree -c tree /some/path`
-6. Agent returns: actual directory tree output
+4. Run `nix search nixpkgs tree`
+5. Pick `tree` package, run `nix shell nixpkgs#tree -c tree /some/path`
+6. Return: actual directory tree output
 
 ### Missing `jq` command
 1. User runs: `cat data.json | jq '.name'`
 2. Error: `command not found: jq`
-3. Delegate to nixos agent: "Run 'jq '.name'' with nix shell"
-4. Agent finds `jq` package, runs with stdin preserved
-5. Agent returns: actual JSON parsing result
+3. Run `nix search nixpkgs jq`
+4. Pick `jq` package, run with stdin preserved
+5. Return: actual JSON parsing result
 
 ### Missing `cargo` command
 1. User runs: `cargo build`
 2. Error: `command not found: cargo`
-3. Delegate to nixos agent: "Run 'cargo build' with nix shell"
-4. Agent finds `cargo` package, runs `nix shell nixpkgs#cargo -c cargo build`
-5. Agent returns: actual build output or errors
+3. Run `nix search nixpkgs cargo`
+4. Pick `cargo` package, run `nix shell nixpkgs#cargo -c cargo build`
+5. Return: actual build output or errors
+
+### Suggested nix shell already provided
+1. Error output includes: `use nix shell nixpkgs#ripgrep -c rg ...`
+2. Run that exact command
+3. Return command output
 
 ## Edge Cases
 
 ### Multiple Package Options
-Nixos agent handles all selection logic internally:
-- Uses nixos MCP tools to find best match
-- Considers exact name matches, package descriptions, etc.
-- Picks most appropriate option or asks user if truly ambiguous
+Try local selection order first. If still ambiguous, delegate to nixos agent.
 
 ### Complex Commands  
 Nixos agent handles command complexity:
@@ -84,24 +93,15 @@ Nixos agent handles command complexity:
 - Maintains stdin/stdout/stderr as expected
 
 ### Already in Nix Shell
-Nixos agent handles this case:
-- Detects if already in nix shell
-- Still proceeds (might need different package)
-- Can inform user about current nix shell context
+Still proceed (might need different package). Inform user about current nix shell context.
 
 ## Error Handling
 
 ### Package Not Found
-Nixos agent handles all error scenarios:
-- Tries broader search terms and fallbacks
-- Searches programs, options, or suggests alternatives
-- Returns helpful error message if no package found
+If local search fails, delegate to nixos agent for broader search/fallbacks.
 
 ### Command Failures
-Nixos agent returns actual command results:
-- Shows real command output if successful
-- Returns actual error messages if command fails
-- Distinguishes between "package not found" vs "command failed"
+Return actual command results. Distinguish between "package not found" vs "command failed".
 
 ## Integration Notes
 
@@ -113,18 +113,19 @@ Monitor for these error patterns:
 - `bash: <cmd>: command not found`
 
 ### Agent Responsibilities
-Nixos agent handles all technical details:
+Only delegate when local search fails or ambiguous. When delegated, nixos agent handles:
 - Maintains current working directory
-- Preserves environment variables  
+- Preserves environment variables
 - Keeps stdin/stdout/stderr intact
 - Shows what package was used
 - Provides appropriate feedback
 
 ### Main Agent Role
-Main agent just:
 - Detects NixOS environment
-- Delegates to nixos agent
-- Returns agent's command results to user
+- Runs suggested nix shell if present
+- Else runs local `nix search`
+- Delegates only if needed
+- Returns command results to user
 
 ## Configuration
 
