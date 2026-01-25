@@ -65,6 +65,25 @@ let
   # Convert mcps list to Opencode tools format ({name}*: true)
   mcpListToOpencodeTools = mcps: lib.listToAttrs (map (name: lib.nameValuePair "${name}*" true) mcps);
 
+  renderYaml =
+    indent: attrs:
+    lib.concatStringsSep "\n" (
+      lib.mapAttrsToList (
+        key: value:
+        if builtins.isAttrs value then
+          "${indent}${key}:\n${renderYaml (indent + "  ") value}"
+        else
+          "${indent}${key}: ${
+            if value == true then
+              "true"
+            else if value == false then
+              "false"
+            else
+              toString value
+          }"
+      ) attrs
+    );
+
   # Generate opencode agent frontmatter
   generateOpencodeFrontmatter =
     name: agent:
@@ -99,11 +118,17 @@ let
           ) opcodeTools
         )}
       '';
+
+      permissionSection = lib.optionalString ((agent.permission or null) != null) ''
+        permission:
+        ${renderYaml "  " agent.permission}
+      '';
     in
     ''
       ---
       ${lib.concatStringsSep "\n" fields}
       ${toolsSection}
+      ${permissionSection}
       ---
     '';
 
@@ -132,7 +157,7 @@ in
         enable = true;
         package = mkDefault pkgs.opencode;
         settings = {
-          theme = "dark";
+          model = cfg.opencode.model;
           mcp = lib.mapAttrs transformMcpForOpencode personalMcpServers;
           provider = personalProviders;
           plugin = cfg.opencode.plugins;

@@ -23,6 +23,11 @@ in
   options.programs.ai-tools = {
     enable = mkEnableOption "unified AI tools configuration";
     opencode = {
+      model = mkOption {
+        type = types.str;
+        default = "antigravity-gemini-3-pro";
+        description = "Default OpenCode model (provider/model key).";
+      };
       plugins = mkOption {
         type = types.listOf types.str;
         default = [
@@ -30,9 +35,9 @@ in
           "opencode-gemini-auth@1.3.8"
           "@tarquinen/opencode-dcp@1.2.7"
           "@franlol/opencode-md-table-formatter@0.0.3"
+          "oh-my-opencode@3.0.1"
           "opencode-antigravity-auth@1.3.1"
           "opencode-openai-codex-auth@4.4.0"
-          "@mohak34/opencode-notifier@0.1.15"
           "opencode-websearch-cited@1.2.0"
           "@simonwjackson/opencode-direnv@2025.1211.9"
         ];
@@ -91,6 +96,7 @@ in
         };
       };
     };
+
   };
 
   config = mkIf cfg.enable {
@@ -116,5 +122,6 @@ in
         OLLAMA_CONTEXT_LENGTH = "32768";
       };
     };
+
   };
 }
