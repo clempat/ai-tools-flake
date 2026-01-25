@@ -62,7 +62,6 @@
     model = "sonnet";
     color = "green";
     mode = "all";
-    opencodeModel = "anthropic/claude-sonnet-4-20250514";
     temperature = 0.1;
     mcps = [ "nixos" ];
   };

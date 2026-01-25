@@ -184,6 +184,34 @@ in
       programs.opencode.commands = shared.commandsAttrSet;
       home.file = {
         ".config/opencode/skills".source = ../config/skills;
+        ".config/opencode/oh-my-opencode.json".text = builtins.toJSON {
+          agents = {
+            librarian = {
+              model = cfg.opencode.model;
+            };
+            explore = {
+              model = cfg.opencode.model;
+            };
+            oracle = {
+              model = cfg.opencode.model;
+            };
+            metis = {
+              model = cfg.opencode.model;
+            };
+            momus = {
+              model = cfg.opencode.model;
+            };
+            atlas = {
+              model = cfg.opencode.model;
+            };
+            "multimodal-looker" = {
+              model = cfg.opencode.model;
+            };
+            "Sisyphus-Junior" = {
+              model = "openai/gpt-5.2";
+            };
+          };
+        };
       };
     }
   ]);
