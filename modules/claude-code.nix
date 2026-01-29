@@ -58,9 +58,7 @@ let
             [ ]
         );
 
-      allTools =
-        (agent.tools or [ ])
-        ++ mcpListToClaudeTools (lib.unique mcpList);
+      allTools = (agent.tools or [ ]) ++ mcpListToClaudeTools (lib.unique mcpList);
 
       fields = lib.optionals (!(agent.disable or false)) (
         [
@@ -113,7 +111,7 @@ in
         package = mkDefault pkgs.claude-code;
         mcpServers = personalMcpServers;
         settings = {
-          theme = "dark";
+          theme = lib.mkDefault "dark";
           preferredNotifChannel = "native";
           disabledMcpjsonServers = disabledMcpServers;
         }
