@@ -12,6 +12,18 @@
     "enabled": true,
     "schedule": ["before 6am on monday"]
   },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "OpenCode npm plugins in Nix module (name@version)",
+      "managerFilePatterns": ["/^modules/ai-tools\\.nix$/"],
+      "matchStrings": [
+        "\"(?<depName>@?[^\"@]+(?:/[^\"@]+)?)@(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "npm",
+      "versioningTemplate": "npm"
+    }
+  ],
   "packageRules": [
     {
       "description": "Automerge non-major updates with 3-day delay",
@@ -23,6 +35,13 @@
       "description": "Require manual approval for major updates",
       "matchUpdateTypes": ["major"],
       "dependencyDashboardApproval": true
+    },
+    {
+      "description": "OpenCode plugins",
+      "matchManagers": ["custom.regex"],
+      "matchFileNames": ["modules/ai-tools.nix"],
+      "groupName": "opencode plugins",
+      "schedule": ["before 6am on monday"]
     },
     {
       "description": "Nix flake inputs",
