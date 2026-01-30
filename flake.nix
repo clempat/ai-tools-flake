@@ -31,6 +31,7 @@
         {
           pkgs,
           system,
+          lib,
           ...
         }:
         {
@@ -47,12 +48,13 @@
               spec-kit
               beads
               bdui
-              agent-browser
               ccusage
               ccusage-codex
               ccusage-opencode
               opencode
               ;
+          } // lib.optionalAttrs pkgs.stdenv.isLinux {
+            inherit (pkgs) agent-browser; # chromium only available on Linux
           };
 
           # Quick AI shell (without home-manager)
@@ -63,8 +65,9 @@
               pkgs.claude-code
               pkgs.beads
               pkgs.bdui
-              pkgs.agent-browser
               pkgs.gh # Required for ticket-driven-developer agent
+            ] ++ lib.optionals pkgs.stdenv.isLinux [
+              pkgs.agent-browser # chromium only available on Linux
             ];
 
             shellHook = ''

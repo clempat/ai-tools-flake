@@ -5,7 +5,6 @@ final: prev:
   spec-kit = final.callPackage ../pkgs/spec-kit.nix { };
   beads = final.callPackage ../pkgs/beads.nix { };
   bdui = final.callPackage ../pkgs/bdui.nix { };
-  agent-browser = final.callPackage ../pkgs/agent-browser.nix { };
   ccusage = final.callPackage ../pkgs/ccusage.nix { };
   ccusage-codex = final.callPackage ../pkgs/ccusage-codex.nix { };
   ccusage-opencode = final.callPackage ../pkgs/ccusage-opencode.nix { };
@@ -17,4 +16,7 @@ final: prev:
   # These are available in nixpkgs unstable
   mcp-proxy = prev.mcp-proxy;
   claude-code = prev.claude-code;
+} // prev.lib.optionalAttrs prev.stdenv.isLinux {
+  # chromium is Linux-only in nixpkgs; avoid eval failures on Darwin
+  agent-browser = final.callPackage ../pkgs/agent-browser.nix { };
 }

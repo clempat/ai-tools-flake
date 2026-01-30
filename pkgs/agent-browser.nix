@@ -25,6 +25,6 @@
     license = lib.licenses.asl20;
     maintainers = [ ];
     mainProgram = "agent-browser";
-    platforms = lib.platforms.unix;
+    platforms = lib.platforms.linux;
   };
 })
