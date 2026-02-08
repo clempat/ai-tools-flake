@@ -17,9 +17,9 @@
     {
       "customType": "regex",
       "description": "OpenCode npm plugins in Nix module (name@version)",
-      "managerFilePatterns": ["^modules/ai-tools\\.nix$"],
+      "managerFilePatterns": ["/^modules\\/ai-tools\\.nix$/"],
       "matchStrings": [
-        "\"(?<depName>@[a-z0-9][a-z0-9-]*/[a-z0-9][a-z0-9-]*|[a-z0-9][a-z0-9-]*)@(?<currentValue>[0-9][0-9A-Za-z.+-]*)\""
+        "\"(?<depName>@[^\"/@\\s]+/[^\"@\\s]+|[^\"@\\s]+)@(?<currentValue>[0-9][0-9A-Za-z.+-]*)\""
       ],
       "datasourceTemplate": "npm",
       "versioningTemplate": "npm"
@@ -40,7 +40,7 @@
     {
       "description": "OpenCode plugins",
       "matchManagers": ["custom.regex"],
-      "matchFileNames": ["modules/ai-tools.nix"],
+      "matchFileNames": ["/^modules\\/ai-tools\\.nix$/"],
       "groupName": "opencode plugins"
     },
     {
