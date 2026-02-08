@@ -33,7 +33,7 @@ in
         default = [
           "opencode-beads@0.4.0"
           "opencode-antigravity-auth@1.4.5"
-          "@tarquinen/opencode-dcp@1.2.8"
+          "@tarquinen/opencode-dcp@2.0.2"
           "@franlol/opencode-md-table-formatter@0.0.3"
           "oh-my-opencode@3.2.3"
           "opencode-antigravity-auth@1.4.5"
