@@ -20,8 +20,8 @@
       ];
 
       flake = {
-        # Home-manager module
-        homeManagerModules.default = import ./modules/ai-tools.nix;
+        # Shared Nix module (usable from Home Manager imports)
+        nixosModules.default = import ./modules/ai-tools.nix;
 
         # Overlay: uses inputs.nixpkgs (via follows) for packages missing in consumer's nixpkgs
         overlays.default = import ./overlays/default.nix { inherit inputs; };
@@ -72,7 +72,7 @@
 
             shellHook = ''
               echo "AI Tools: opencode, claude-code, beads (bd), bdui, agent-browser, gh"
-              echo "For full config: use homeManagerModules.default"
+              echo "For full config: use nixosModules.default"
             '';
           };
         };

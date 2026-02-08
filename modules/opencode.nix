@@ -212,7 +212,7 @@ in
             "multimodal-looker" = {
               model = cfg.opencode.model;
             };
-            "Sisyphus-Junior" = {
+            "sisyphus-junior" = {
               # Keep junior on same configured model/provider to avoid ProviderModelNotFoundError
               # when OpenAI model/provider is not available in this environment.
               model = cfg.opencode.model;

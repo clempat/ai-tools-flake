@@ -40,7 +40,7 @@ Add to your `flake.nix`:
     homeConfigurations.youruser = home-manager.lib.homeManagerConfiguration {
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
       modules = [
-        ai-tools.homeManagerModules.default
+        ai-tools.nixosModules.default
         {
           programs.ai-tools.enable = true;
         }
@@ -57,7 +57,7 @@ Add to your `flake.nix`:
 ```nix
 { inputs, ... }:
 {
-  imports = [ inputs.ai-tools.homeManagerModules.default ];
+  imports = [ inputs.ai-tools.nixosModules.default ];
 
   programs.ai-tools.enable = true;
   
@@ -76,7 +76,7 @@ The module automatically uses packages from the flake. To override:
 ```nix
 { inputs, pkgs, ... }:
 {
-  imports = [ inputs.ai-tools.homeManagerModules.default ];
+  imports = [ inputs.ai-tools.nixosModules.default ];
 
   programs.ai-tools.enable = true;
   
@@ -228,7 +228,7 @@ ai-tools-flake/
 - **n8n**: n8n workflow automation
 - **todoist**: Todoist task management
 - **playwright**: Browser automation
-- **refs**: refs.tool documentation
+- **refs**: refs MCP documentation/search
 
 ## Available Skills
 

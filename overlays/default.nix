@@ -10,7 +10,7 @@ final: prev:
   ccusage-opencode = final.callPackage ../pkgs/ccusage-opencode.nix { };
 
   # Packages from other flakes - prefer consuming flake's versions
-  opencode = inputs.opencode.packages.${final.system}.default or prev.opencode;
+  opencode = inputs.opencode.packages.${final.stdenv.hostPlatform.system}.default or prev.opencode;
   
   # Use packages from consuming flake's nixpkgs (respects their version choice)
   # These are available in nixpkgs unstable
