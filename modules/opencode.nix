@@ -185,6 +185,11 @@ in
       home.file = {
         ".config/opencode/skills".source = ../config/skills;
         ".config/opencode/oh-my-opencode.json".text = builtins.toJSON {
+          disabled_hooks = [
+            # Home Manager manages ~/.config/opencode as immutable symlinks.
+            # oh-my-opencode auto-update tries to rewrite opencode config and can hit EACCES.
+            "auto-update-checker"
+          ];
           agents = {
             librarian = {
               model = cfg.opencode.model;
@@ -208,7 +213,9 @@ in
               model = cfg.opencode.model;
             };
             "Sisyphus-Junior" = {
-              model = "openai/gpt-5.2";
+              # Keep junior on same configured model/provider to avoid ProviderModelNotFoundError
+              # when OpenAI model/provider is not available in this environment.
+              model = cfg.opencode.model;
             };
           };
         };
