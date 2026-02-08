@@ -189,6 +189,7 @@ ai-tools-flake/
 │   ├── memory.md          # Default memory/rules
 │   ├── agents/            # Agent content markdown files
 │   └── skills/            # Claude skills
+│       ├── gitea-tea/
 │       ├── lint-with-conform/
 │       ├── nixos-advisor/
 │       └── nixos-command-not-found/
@@ -232,6 +233,7 @@ ai-tools-flake/
 ## Available Skills
 
 - **lint-with-conform**: Format files based on conform config
+- **gitea-tea**: Gitea workflows with tea CLI
 - **nixos-advisor**: NixOS configuration advice
 - **obsidian-worklog**: Obsidian worklog integration
 
