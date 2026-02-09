@@ -149,6 +149,55 @@ let
     lib.filterAttrs (name: agent: !(agent.disable or false)) personalAgents
   );
 
+  ohMyOpencodeBuiltins = [
+    "librarian"
+    "explore"
+    "oracle"
+    "metis"
+    "momus"
+    "atlas"
+    "multimodal-looker"
+    "sisyphus-junior"
+  ];
+
+  recommendedModelByAgent = {
+    explore = "antigravity-gemini-3-flash";
+    librarian = "antigravity-gemini-3-flash";
+    atlas = "antigravity-gemini-3-flash";
+    oracle = "antigravity-claude-sonnet-4-5-thinking";
+    metis = "antigravity-claude-sonnet-4-5-thinking";
+    momus = "antigravity-claude-sonnet-4-5-thinking";
+    "multimodal-looker" = "antigravity-gemini-3-pro";
+    "sisyphus-junior" = "antigravity-claude-sonnet-4-5";
+  };
+
+  recommendedModelByCategory = {
+    quick = "antigravity-gemini-3-flash";
+    writing = "antigravity-gemini-3-flash";
+    "unspecified-low" = "antigravity-gemini-3-flash";
+    "visual-engineering" = "antigravity-gemini-3-pro";
+    deep = "antigravity-claude-sonnet-4-5-thinking";
+    "unspecified-high" = "antigravity-claude-sonnet-4-5-thinking";
+    ultrabrain = "antigravity-claude-opus-4-5-thinking";
+    artistry = "antigravity-claude-opus-4-5-thinking";
+  };
+
+  effectiveModelByAgent =
+    (if cfg.opencode.useRecommendedRouting then recommendedModelByAgent else { })
+    // cfg.opencode.modelByAgent;
+
+  effectiveModelByCategory =
+    (if cfg.opencode.useRecommendedRouting then recommendedModelByCategory else { })
+    // cfg.opencode.modelByCategory;
+
+  resolveOhMyOpencodeModel = name: effectiveModelByAgent.${name} or cfg.opencode.model;
+
+  ohMyOpencodeAgents = lib.genAttrs ohMyOpencodeBuiltins (name: {
+    model = resolveOhMyOpencodeModel name;
+  });
+
+  ohMyOpencodeCategories = lib.mapAttrs (_: model: { inherit model; }) effectiveModelByCategory;
+
 in
 {
   config = mkIf cfg.enable (mkMerge [
@@ -181,45 +230,23 @@ in
     })
     {
       programs.opencode.rules = personalMemory;
-      programs.opencode.commands = shared.commandsAttrSet;
-      home.file = {
-        ".config/opencode/skills".source = ../config/skills;
-        ".config/opencode/oh-my-opencode.json".text = builtins.toJSON {
-          disabled_hooks = [
-            # Home Manager manages ~/.config/opencode as immutable symlinks.
-            # oh-my-opencode auto-update tries to rewrite opencode config and can hit EACCES.
-            "auto-update-checker"
-          ];
-          agents = {
-            librarian = {
-              model = cfg.opencode.model;
-            };
-            explore = {
-              model = cfg.opencode.model;
-            };
-            oracle = {
-              model = cfg.opencode.model;
-            };
-            metis = {
-              model = cfg.opencode.model;
-            };
-            momus = {
-              model = cfg.opencode.model;
-            };
-            atlas = {
-              model = cfg.opencode.model;
-            };
-            "multimodal-looker" = {
-              model = cfg.opencode.model;
-            };
-            "sisyphus-junior" = {
-              # Keep junior on same configured model/provider to avoid ProviderModelNotFoundError
-              # when OpenAI model/provider is not available in this environment.
-              model = cfg.opencode.model;
-            };
-          };
+        programs.opencode.commands = shared.commandsAttrSet;
+        home.file = {
+          ".config/opencode/skills".source = ../config/skills;
+          ".config/opencode/oh-my-opencode.json".text = builtins.toJSON (
+            {
+              disabled_hooks = [
+                # Home Manager manages ~/.config/opencode as immutable symlinks.
+                # oh-my-opencode auto-update tries to rewrite opencode config and can hit EACCES.
+                "auto-update-checker"
+              ];
+              agents = ohMyOpencodeAgents;
+            }
+            // lib.optionalAttrs (ohMyOpencodeCategories != { }) {
+              categories = ohMyOpencodeCategories;
+            }
+          );
         };
-      };
-    }
+      }
   ]);
 }

@@ -28,6 +28,21 @@ in
         default = "antigravity-gemini-3-pro";
         description = "Default OpenCode model (provider/model key).";
       };
+      useRecommendedRouting = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Whether to apply recommended oh-my-opencode agent/category model routing defaults.";
+      };
+      modelByAgent = mkOption {
+        type = types.attrsOf types.str;
+        default = { };
+        description = "Per oh-my-opencode built-in agent model overrides (agent-name -> provider/model key). Takes precedence over recommended routing.";
+      };
+      modelByCategory = mkOption {
+        type = types.attrsOf types.str;
+        default = { };
+        description = "Per oh-my-opencode category model overrides (category-name -> provider/model key). Takes precedence over recommended routing.";
+      };
       plugins = mkOption {
         type = types.listOf types.str;
         default = [
