@@ -160,6 +160,8 @@ let
     "sisyphus-junior"
   ];
 
+  qualifyModel = model: if lib.hasInfix "/" model then model else "google/${model}";
+
   recommendedModelByAgent = {
     explore = "antigravity-gemini-3-flash";
     librarian = "antigravity-gemini-3-flash";
@@ -190,13 +192,13 @@ let
     (if cfg.opencode.useRecommendedRouting then recommendedModelByCategory else { })
     // cfg.opencode.modelByCategory;
 
-  resolveOhMyOpencodeModel = name: effectiveModelByAgent.${name} or cfg.opencode.model;
+  resolveOhMyOpencodeModel = name: qualifyModel (effectiveModelByAgent.${name} or cfg.opencode.model);
 
   ohMyOpencodeAgents = lib.genAttrs ohMyOpencodeBuiltins (name: {
     model = resolveOhMyOpencodeModel name;
   });
 
-  ohMyOpencodeCategories = lib.mapAttrs (_: model: { inherit model; }) effectiveModelByCategory;
+  ohMyOpencodeCategories = lib.mapAttrs (_: model: { model = qualifyModel model; }) effectiveModelByCategory;
 
 in
 {
@@ -206,7 +208,7 @@ in
         enable = true;
         package = mkDefault pkgs.opencode;
         settings = {
-          model = cfg.opencode.model;
+          model = qualifyModel cfg.opencode.model;
           mcp = lib.mapAttrs transformMcpForOpencode personalMcpServers;
           provider = personalProviders;
           plugin = cfg.opencode.plugins;
