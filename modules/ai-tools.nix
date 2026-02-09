@@ -25,7 +25,7 @@ in
     opencode = {
       model = mkOption {
         type = types.str;
-        default = "antigravity-gemini-3-pro";
+        default = "openai/gpt-5.3-codex";
         description = "Default OpenCode model (provider/model key).";
       };
       useRecommendedRouting = mkOption {

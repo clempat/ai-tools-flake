@@ -169,7 +169,7 @@ let
     oracle = "antigravity-claude-sonnet-4-5-thinking";
     metis = "antigravity-claude-sonnet-4-5-thinking";
     momus = "antigravity-claude-sonnet-4-5-thinking";
-    "multimodal-looker" = "antigravity-gemini-3-pro";
+    "multimodal-looker" = "openai/gpt-5.3-codex";
     "sisyphus-junior" = "antigravity-claude-sonnet-4-5";
   };
 
@@ -177,7 +177,7 @@ let
     quick = "antigravity-gemini-3-flash";
     writing = "antigravity-gemini-3-flash";
     "unspecified-low" = "antigravity-gemini-3-flash";
-    "visual-engineering" = "antigravity-gemini-3-pro";
+    "visual-engineering" = "openai/gpt-5.3-codex";
     deep = "antigravity-claude-sonnet-4-5-thinking";
     "unspecified-high" = "antigravity-claude-sonnet-4-5-thinking";
     ultrabrain = "antigravity-claude-opus-4-5-thinking";
