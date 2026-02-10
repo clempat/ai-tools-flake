@@ -47,7 +47,7 @@ in
         type = types.listOf types.str;
         default = [
           "opencode-beads@0.4.0"
-          "opencode-antigravity-auth@1.4.5"
+          "opencode-antigravity-auth@1.4.6"
           "@tarquinen/opencode-dcp@2.0.2"
           "@franlol/opencode-md-table-formatter@0.0.3"
           "oh-my-opencode@3.2.4"
