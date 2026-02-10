@@ -20,8 +20,8 @@
       ];
 
       flake = {
-        # Shared Nix module (usable from Home Manager imports)
-        nixosModules.default = import ./modules/ai-tools.nix;
+        # Home Manager module
+        homeManagerModules.default = import ./modules/ai-tools.nix;
 
         # Overlay: uses inputs.nixpkgs (via follows) for packages missing in consumer's nixpkgs
         overlays.default = import ./overlays/default.nix { inherit inputs; };
