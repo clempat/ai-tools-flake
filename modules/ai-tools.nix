@@ -50,7 +50,7 @@ in
           "opencode-antigravity-auth@1.4.6"
           "@tarquinen/opencode-dcp@2.0.2"
           "@franlol/opencode-md-table-formatter@0.0.3"
-          "oh-my-opencode@3.3.2"
+          "oh-my-opencode@3.4.0"
           "opencode-openai-codex-auth@4.4.0"
           "opencode-websearch-cited@1.2.0"
           "@simonwjackson/opencode-direnv@2025.1211.9"
