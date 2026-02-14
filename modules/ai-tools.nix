@@ -40,7 +40,7 @@ in {
         default = [
           "opencode-beads@0.4.0"
           "opencode-antigravity-auth@1.5.1"
-          "@tarquinen/opencode-dcp@2.1.0"
+          "@tarquinen/opencode-dcp@2.1.1"
           "@franlol/opencode-md-table-formatter@0.0.3"
           "oh-my-opencode@3.5.3"
           "opencode-openai-codex-auth@4.4.0"
