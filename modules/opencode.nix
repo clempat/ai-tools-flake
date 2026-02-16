@@ -163,25 +163,25 @@ let
   qualifyModel = model: if lib.hasInfix "/" model then model else "google/${model}";
 
   recommendedModelByAgent = {
-    explore = "antigravity-gemini-3-flash";
-    librarian = "antigravity-gemini-3-flash";
-    atlas = "antigravity-gemini-3-flash";
-    oracle = "antigravity-claude-sonnet-4-5-thinking";
-    metis = "antigravity-claude-sonnet-4-5-thinking";
-    momus = "antigravity-claude-sonnet-4-5-thinking";
+    explore = "opencode/kimi-k2.5-free";
+    librarian = "opencode/kimi-k2.5-free";
+    atlas = "opencode/kimi-k2.5-free";
+    oracle = "openai/gpt-5.3-codex";
+    metis = "openai/gpt-5.3-codex";
+    momus = "openai/gpt-5.3-codex";
     "multimodal-looker" = "openai/gpt-5.3-codex";
-    "sisyphus-junior" = "antigravity-claude-sonnet-4-5";
+    "sisyphus-junior" = "opencode/kimi-k2.5-free";
   };
 
   recommendedModelByCategory = {
-    quick = "antigravity-gemini-3-flash";
-    writing = "antigravity-gemini-3-flash";
-    "unspecified-low" = "antigravity-gemini-3-flash";
+    quick = "opencode/kimi-k2.5-free";
+    writing = "opencode/kimi-k2.5-free";
+    "unspecified-low" = "opencode/kimi-k2.5-free";
     "visual-engineering" = "openai/gpt-5.3-codex";
-    deep = "antigravity-claude-sonnet-4-5-thinking";
-    "unspecified-high" = "antigravity-claude-sonnet-4-5-thinking";
-    ultrabrain = "antigravity-claude-opus-4-5-thinking";
-    artistry = "antigravity-claude-opus-4-5-thinking";
+    deep = "openai/gpt-5.3-codex";
+    "unspecified-high" = "openai/gpt-5.3-codex";
+    ultrabrain = "openai/gpt-5.3-codex";
+    artistry = "openai/gpt-5.3-codex";
   };
 
   effectiveModelByAgent =
