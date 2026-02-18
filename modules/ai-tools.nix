@@ -42,7 +42,7 @@ in {
           "opencode-antigravity-auth@1.5.1"
           "@tarquinen/opencode-dcp@2.1.3"
           "@franlol/opencode-md-table-formatter@0.0.3"
-          "oh-my-opencode@3.5.3"
+          "oh-my-opencode@3.5.5"
           "opencode-openai-codex-auth@4.4.0"
           "opencode-websearch-cited@1.2.0"
           "@simonwjackson/opencode-direnv@2025.1211.9"
