@@ -39,10 +39,10 @@ in {
         type = types.listOf types.str;
         default = [
           "opencode-beads@0.4.0"
-          "opencode-antigravity-auth@1.5.1"
-          "@tarquinen/opencode-dcp@2.1.3"
+          "opencode-antigravity-auth@1.5.2"
+          "@tarquinen/opencode-dcp@2.1.5"
           "@franlol/opencode-md-table-formatter@0.0.3"
-          "oh-my-opencode@3.5.5"
+          "oh-my-opencode@3.5.6"
           "opencode-openai-codex-auth@4.4.0"
           "opencode-websearch-cited@1.2.0"
           "@simonwjackson/opencode-direnv@2025.1211.9"
