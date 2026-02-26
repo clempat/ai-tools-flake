@@ -9,8 +9,12 @@ final: prev:
   ccusage-codex = final.callPackage ../pkgs/ccusage-codex.nix { };
   ccusage-opencode = final.callPackage ../pkgs/ccusage-opencode.nix { };
 
-  # Packages from other flakes - prefer consuming flake's versions
-  opencode = inputs.opencode.packages.${final.stdenv.hostPlatform.system}.default or prev.opencode;
+  # Packages from other flakes - only use upstream opencode when bun is new enough
+  opencode =
+    if builtins.compareVersions prev.bun.version "1.3.10" >= 0 then
+      (inputs.opencode.packages.${final.stdenv.hostPlatform.system}.default or prev.opencode)
+    else
+      prev.opencode;
   
   # Use packages from consuming flake's nixpkgs (respects their version choice)
   # These are available in nixpkgs unstable

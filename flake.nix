@@ -7,6 +7,7 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
 
     opencode.url = "github:sst/opencode";
+    opencode.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
