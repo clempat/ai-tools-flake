@@ -168,4 +168,13 @@
     ];
     env = { };
   };
+
+  homeassistant-extended = {
+    enable = false;
+    type = "http";
+    url = "https://mcp.patout.app/mcp/homeassistant-extended";
+    headers = {
+      Authorization = "Bearer wH0wuvH41jffjE1aFO7qlcl0OX7TtvWj";
+    };
+  };
 }
