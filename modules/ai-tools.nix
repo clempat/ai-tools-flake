@@ -108,6 +108,7 @@ in {
       mkMerge [
         (mkIf cfg.beads.enable [ beads uv ])
         (mkIf (cfg.beads.enable && cfg.beads.ui) [ bdui ])
+        (mkIf pkgs.stdenv.isLinux [ agent-browser ])
       ];
 
     programs.codex.enable = cfg.codex.enable;

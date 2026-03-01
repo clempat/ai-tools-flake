@@ -173,7 +173,7 @@ Commands automatically configured via:
 
 ```bash
 nix develop github:clempat/ai-tools-flake
-# Provides: opencode, claude-code, gh
+# Provides: opencode, claude-code, agent-browser (Linux), gh
 ```
 
 ## Structure
@@ -189,6 +189,7 @@ ai-tools-flake/
 │   ├── memory.md          # Default memory/rules
 │   ├── agents/            # Agent content markdown files
 │   └── skills/            # Claude skills
+│       ├── agent-browser/
 │       ├── gitea-tea/
 │       ├── lint-with-conform/
 │       ├── nixos-advisor/
@@ -233,6 +234,7 @@ ai-tools-flake/
 ## Available Skills
 
 - **lint-with-conform**: Format files based on conform config
+- **agent-browser**: Browser automation workflows for agent-browser CLI
 - **gitea-tea**: Gitea workflows with tea CLI
 - **nixos-advisor**: NixOS configuration advice
 - **obsidian-worklog**: Obsidian worklog integration
