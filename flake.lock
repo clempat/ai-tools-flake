@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "excalidraw-diagram-skill": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1772372175,
+        "narHash": "sha256-X0GEwn/1n6jxmnaF0YMMBWpEOaQ8XOy3yigLXkBDi/w=",
+        "owner": "coleam00",
+        "repo": "excalidraw-diagram-skill",
+        "rev": "8646fcc9f74f38539c6cdb4c969723336a96ddcd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "coleam00",
+        "repo": "excalidraw-diagram-skill",
+        "type": "github"
+      }
+    },
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": "nixpkgs-lib"
@@ -71,6 +87,7 @@
     },
     "root": {
       "inputs": {
+        "excalidraw-diagram-skill": "excalidraw-diagram-skill",
         "flake-parts": "flake-parts",
         "nixpkgs": "nixpkgs",
         "opencode": "opencode"

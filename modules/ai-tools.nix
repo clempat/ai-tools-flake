@@ -1,5 +1,6 @@
 # Unified AI tools configuration module
 # Orchestrates opencode, claude-code, and claude-desktop configurations
+{ inputs }:
 { config, lib, pkgs, ... }:
 
 with lib;
@@ -7,7 +8,11 @@ with lib;
 let cfg = config.programs.ai-tools;
 
 in {
-  imports = [ ./opencode.nix ./claude-code.nix ./claude-desktop.nix ];
+  imports = [
+    (import ./opencode.nix { inherit inputs; })
+    ./claude-code.nix
+    ./claude-desktop.nix
+  ];
 
   options.programs.ai-tools = {
     enable = mkEnableOption "unified AI tools configuration";

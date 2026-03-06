@@ -188,7 +188,7 @@ ai-tools-flake/
 │   ├── mcps.nix           # Default MCP server configurations
 │   ├── memory.md          # Default memory/rules
 │   ├── agents/            # Agent content markdown files
-│   └── skills/            # Claude skills
+│   └── skills/            # Claude skills (plus pinned external inputs)
 │       ├── agent-browser/
 │       ├── gitea-tea/
 │       ├── lint-with-conform/
@@ -235,6 +235,7 @@ ai-tools-flake/
 
 - **lint-with-conform**: Format files based on conform config
 - **agent-browser**: Browser automation workflows for agent-browser CLI
+- **excalidraw-diagram**: Generate Excalidraw `.excalidraw` diagrams from text specs
 - **gitea-tea**: Gitea workflows with tea CLI
 - **nixos-advisor**: NixOS configuration advice
 - **obsidian-worklog**: Obsidian worklog integration
