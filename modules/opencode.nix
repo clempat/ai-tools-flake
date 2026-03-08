@@ -1,6 +1,11 @@
 # OpenCode configuration module
 { inputs }:
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
@@ -15,90 +20,123 @@ let
   personalMemory = ../config/memory.md;
 
   # Override beads MCP server enable state based on ai-tools.beads.enable
-  personalMcpServers = baseMcpServers
+  personalMcpServers =
+    baseMcpServers
     // (optionalAttrs (baseMcpServers ? beads) {
-      beads = baseMcpServers.beads // { enable = cfg.beads.enable; };
+      beads = baseMcpServers.beads // {
+        enable = cfg.beads.enable;
+      };
     });
 
-  enabledMcpList = lib.attrNames
-    (lib.filterAttrs (name: server: server.enable or false) personalMcpServers);
+  allMcpNames = lib.attrNames personalMcpServers;
+  invalidDefaultEnabledMcpTools = lib.filter (
+    name: !(lib.elem name allMcpNames)
+  ) cfg.opencode.defaultEnabledMcpTools;
+  defaultEnabledMcpTools =
+    if cfg.opencode.enableAllMcpToolsByDefault then
+      allMcpNames
+    else
+      cfg.opencode.defaultEnabledMcpTools;
 
   # Transform MCP server for opencode
-  # Remove 'enable' field - we control availability via tools section
+  # Map internal `enable` to OpenCode `enabled`
   # Add oauth = false for HTTP MCPs with headers (v1.0.137+ auto-enables OAuth)
-  transformMcpForOpencode = name: server:
-    let baseServer = builtins.removeAttrs server [ "enable" ];
-    in if baseServer.type == "http" then
-      (builtins.removeAttrs baseServer [ "type" ]) // {
+  transformMcpForOpencode =
+    name: server:
+    let
+      baseServer = builtins.removeAttrs server [ "enable" ];
+      serverEnabled = server.enable or true;
+      withEnabled = baseServer // {
+        enabled = serverEnabled;
+      };
+    in
+    if withEnabled.type == "http" then
+      (builtins.removeAttrs withEnabled [ "type" ])
+      // {
         type = "remote";
-      } // (if baseServer ? headers then { oauth = false; } else { })
-    else if baseServer.type == "stdio" then
+      }
+      // (if withEnabled ? headers then { oauth = false; } else { })
+    else if withEnabled.type == "stdio" then
       let
-        withoutOldFields =
-          builtins.removeAttrs baseServer [ "type" "command" "args" "env" ];
+        withoutOldFields = builtins.removeAttrs withEnabled [
+          "type"
+          "command"
+          "args"
+          "env"
+        ];
         withCommand = withoutOldFields // {
           type = "local";
-          command = [ baseServer.command ] ++ baseServer.args;
+          command = [ withEnabled.command ] ++ withEnabled.args;
         };
-      in if baseServer ? env then
-        withCommand // { environment = baseServer.env; }
-      else
-        withCommand
+      in
+      if withEnabled ? env then withCommand // { environment = withEnabled.env; } else withCommand
     else
-      baseServer;
+      withEnabled;
 
   # Convert mcps list to Opencode tools format ({name}*: true)
-  mcpListToOpencodeTools = mcps:
-    lib.listToAttrs (map (name: lib.nameValuePair "${name}*" true) mcps);
+  mcpListToOpencodeTools = mcps: lib.listToAttrs (map (name: lib.nameValuePair "${name}*" true) mcps);
 
-  renderYaml = indent: attrs:
-    lib.concatStringsSep "\n" (lib.mapAttrsToList (key: value:
-      if builtins.isAttrs value then ''
-        ${indent}${key}:
-        ${renderYaml (indent + "  ") value}'' else
-        "${indent}${key}: ${
-          if value == true then
-            "true"
-          else if value == false then
-            "false"
-          else
-            toString value
-        }") attrs);
+  renderYaml =
+    indent: attrs:
+    lib.concatStringsSep "\n" (
+      lib.mapAttrsToList (
+        key: value:
+        if builtins.isAttrs value then
+          ''
+            ${indent}${key}:
+            ${renderYaml (indent + "  ") value}''
+        else
+          "${indent}${key}: ${
+            if value == true then
+              "true"
+            else if value == false then
+              "false"
+            else
+              toString value
+          }"
+      ) attrs
+    );
 
   # Generate opencode agent frontmatter
-  generateOpencodeFrontmatter = name: agent:
+  generateOpencodeFrontmatter =
+    name: agent:
     let
       # Compute tools section
-      opcodeTools = let
-        agentTools = if (agent.mcps or null) != null then
-          mcpListToOpencodeTools agent.mcps
-        else if (agent.opencodeTools or null) != null then
-          agent.opencodeTools
-        else
-          { };
-        enabledTools = mcpListToOpencodeTools enabledMcpList;
-      in agentTools // enabledTools;
+      opcodeTools =
+        let
+          agentTools =
+            if (agent.mcps or null) != null then
+              mcpListToOpencodeTools agent.mcps
+            else if (agent.opencodeTools or null) != null then
+              agent.opencodeTools
+            else
+              { };
+        in
+        agentTools;
 
-      fields = [ "description: ${agent.description}" ]
-        ++ lib.optional ((agent.mode or null) != null) "mode: ${agent.mode}"
-        ++ lib.optional ((agent.opencodeModel or null) != null)
-        "model: ${agent.opencodeModel}"
-        ++ lib.optional ((agent.temperature or null) != null)
-        "temperature: ${toString agent.temperature}"
-        ++ lib.optional (agent.disable or false) "disable: true";
+      fields = [
+        "description: ${agent.description}"
+      ]
+      ++ lib.optional ((agent.mode or null) != null) "mode: ${agent.mode}"
+      ++ lib.optional ((agent.opencodeModel or null) != null) "model: ${agent.opencodeModel}"
+      ++ lib.optional ((agent.temperature or null) != null) "temperature: ${toString agent.temperature}"
+      ++ lib.optional (agent.disable or false) "disable: true";
 
       toolsSection = lib.optionalString (opcodeTools != { }) ''
         tools:
-        ${lib.concatStringsSep "\n" (lib.mapAttrsToList (pattern: enabled:
-          "  ${pattern}: ${if enabled then "true" else "false"}") opcodeTools)}
+        ${lib.concatStringsSep "\n" (
+          lib.mapAttrsToList (
+            pattern: enabled: "  ${pattern}: ${if enabled then "true" else "false"}"
+          ) opcodeTools
+        )}
       '';
 
-      permissionSection =
-        lib.optionalString ((agent.permission or null) != null) ''
-          permission:
-          ${renderYaml "  " agent.permission}
-        '';
-    in ''
+      permissionSection = lib.optionalString ((agent.permission or null) != null) ''
+        permission:
+        ${renderYaml "  " agent.permission}
+      '';
+    in
+    ''
       ---
       ${lib.concatStringsSep "\n" fields}
       ${toolsSection}
@@ -107,19 +145,21 @@ let
     '';
 
   # Generate opencode agent file with frontmatter + content
-  generateOpencodeAgentFile = name: agent:
+  generateOpencodeAgentFile =
+    name: agent:
     let
       frontmatter = generateOpencodeFrontmatter name agent;
       content = builtins.readFile agent.content;
-    in ''
+    in
+    ''
       ${frontmatter}
       ${content}
     '';
 
   # Convert agents for OpenCode
-  opencodeAgents =
-    lib.mapAttrs (name: agent: generateOpencodeAgentFile name agent)
-    (lib.filterAttrs (name: agent: !(agent.disable or false)) personalAgents);
+  opencodeAgents = lib.mapAttrs (name: agent: generateOpencodeAgentFile name agent) (
+    lib.filterAttrs (name: agent: !(agent.disable or false)) personalAgents
+  );
 
   ohMyOpencodeBuiltins = [
     "librarian"
@@ -133,14 +173,14 @@ let
   ];
 
   recommendedModelByAgent = {
-    explore = "opencode/kimi-k2.5-free";
-    librarian = "opencode/kimi-k2.5-free";
-    atlas = "opencode/kimi-k2.5-free";
+    explore = "opencode/minimax-m2.5-free";
+    librarian = "opencode/minimax-m2.5-free";
+    atlas = "opencode/minimax-m2.5-free";
     oracle = "openai/gpt-5.3-codex";
     metis = "openai/gpt-5.3-codex";
     momus = "openai/gpt-5.3-codex";
     "multimodal-looker" = "openai/gpt-5.3-codex";
-    "sisyphus-junior" = "opencode/kimi-k2.5-free";
+    "sisyphus-junior" = "opencode/minimax-m2.5-free";
   };
 
   recommendedModelByCategory = {
@@ -154,20 +194,19 @@ let
     artistry = "openai/gpt-5.3-codex";
   };
 
-  effectiveModelByAgent = (if cfg.opencode.useRecommendedRouting then
-    recommendedModelByAgent
-  else
-    { }) // cfg.opencode.modelByAgent;
+  effectiveModelByAgent =
+    (if cfg.opencode.useRecommendedRouting then recommendedModelByAgent else { })
+    // cfg.opencode.modelByAgent;
 
-  effectiveModelByCategory = (if cfg.opencode.useRecommendedRouting then
-    recommendedModelByCategory
-  else
-    { }) // cfg.opencode.modelByCategory;
+  effectiveModelByCategory =
+    (if cfg.opencode.useRecommendedRouting then recommendedModelByCategory else { })
+    // cfg.opencode.modelByCategory;
 
   resolveOhMyOpencodeModel = name: effectiveModelByAgent.${name} or cfg.opencode.model;
 
-  ohMyOpencodeAgents = lib.genAttrs ohMyOpencodeBuiltins
-    (name: { model = resolveOhMyOpencodeModel name; });
+  ohMyOpencodeAgents = lib.genAttrs ohMyOpencodeBuiltins (name: {
+    model = resolveOhMyOpencodeModel name;
+  });
 
   ohMyOpencodeCategories = lib.mapAttrs (_: model: { model = model; }) effectiveModelByCategory;
 
@@ -183,7 +222,8 @@ let
     cp -R ${inputs.excalidraw-diagram-skill}/. "$out/excalidraw-diagram/"
   '';
 
-in {
+in
+{
   config = mkIf cfg.enable (mkMerge [
     {
       programs.opencode = {
@@ -194,17 +234,23 @@ in {
           mcp = lib.mapAttrs transformMcpForOpencode personalMcpServers;
           provider = personalProviders;
           plugin = cfg.opencode.plugins;
-          tools = (
-            # Disable per-agent MCP tools globally (those with enable = false)
-            lib.mapAttrs' (name: server: lib.nameValuePair "${name}*" false)
-            (lib.filterAttrs (name: server: !(server.enable or false))
-              personalMcpServers)) // {
-                # Vertex (Gemini) rejects unsigned function-call history.
-                # OpenCode tools key schema seems to reject ':'; disable whole default_api.
-                "default_api*" = false;
-              };
+          tools = (mcpListToOpencodeTools defaultEnabledMcpTools) // {
+            # Vertex (Gemini) rejects unsigned function-call history.
+            # OpenCode tools key schema seems to reject ':'; disable whole default_api.
+            "default_api*" = false;
+          };
         };
       };
+    }
+    {
+      assertions = [
+        {
+          assertion = invalidDefaultEnabledMcpTools == [ ];
+          message =
+            "programs.ai-tools.opencode.defaultEnabledMcpTools contains unknown MCP names: "
+            + (lib.concatStringsSep ", " invalidDefaultEnabledMcpTools);
+        }
+      ];
     }
     (mkIf (opencodeAgents != { }) {
       programs.opencode.agents = opencodeAgents;
@@ -214,16 +260,19 @@ in {
       programs.opencode.commands = shared.commandsAttrSet;
       home.file = {
         ".config/opencode/skills".source = opencodeSkills;
-        ".config/opencode/oh-my-opencode.json".text = builtins.toJSON ({
-          disabled_hooks = [
-            # Home Manager manages ~/.config/opencode as immutable symlinks.
-            # oh-my-opencode auto-update tries to rewrite opencode config and can hit EACCES.
-            "auto-update-checker"
-          ];
-          agents = ohMyOpencodeAgents;
-        } // lib.optionalAttrs (ohMyOpencodeCategories != { }) {
-          categories = ohMyOpencodeCategories;
-        });
+        ".config/opencode/oh-my-opencode.json".text = builtins.toJSON (
+          {
+            disabled_hooks = [
+              # Home Manager manages ~/.config/opencode as immutable symlinks.
+              # oh-my-opencode auto-update tries to rewrite opencode config and can hit EACCES.
+              "auto-update-checker"
+            ];
+            agents = ohMyOpencodeAgents;
+          }
+          // lib.optionalAttrs (ohMyOpencodeCategories != { }) {
+            categories = ohMyOpencodeCategories;
+          }
+        );
       };
     }
   ]);

@@ -54,6 +54,19 @@ in {
         ];
         description = "OpenCode npm plugins (name@version).";
       };
+      defaultEnabledMcpTools = mkOption {
+        type = types.listOf types.str;
+        default = [ ];
+        example = [ "refs" "exa" ];
+        description =
+          "MCP tool prefixes enabled by default in OpenCode tools policy. Empty means default-deny for all MCP tools unless enabled by agent/tool overrides.";
+      };
+      enableAllMcpToolsByDefault = mkOption {
+        type = types.bool;
+        default = false;
+        description =
+          "Enable all configured MCP tools by default in OpenCode. Prefer false for least-privilege policy.";
+      };
     };
     codex = {
       enable = mkOption {
