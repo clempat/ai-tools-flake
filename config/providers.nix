@@ -216,7 +216,7 @@
     };
     models = {
       # Kimi Models
-      "kimi-k2.5" = {
+      "Kimi-K2.5" = {
         name = "Kimi 2.5 (LiteLLM)";
         limit = {
           context = 200000;
@@ -228,7 +228,7 @@
         };
       };
       # MiniMax Models
-      "minimax-m2-1" = {
+      "MiniMax-M2.1" = {
         name = "MiniMax 2.1 (LiteLLM)";
         limit = {
           context = 200000;
@@ -240,7 +240,7 @@
         };
       };
       # Google Gemini Models
-      "gemini-3-flash" = {
+      "gemini/gemini-3-flash-preview" = {
         name = "Gemini 3 Flash (LiteLLM)";
         limit = {
           context = 1000000;
@@ -251,7 +251,7 @@
           output = [ "text" ];
         };
       };
-      "gemini-3-pro" = {
+      "gemini/gemini-3-pro-preview" = {
         name = "Gemini 3 Pro (LiteLLM)";
         limit = {
           context = 1000000;
@@ -297,7 +297,7 @@
         };
       };
       # DeepSeek Models
-      "deepseek-v3" = {
+      "DeepSeek-V3-0324" = {
         name = "DeepSeek V3 (LiteLLM)";
         limit = {
           context = 64000;
@@ -308,7 +308,7 @@
           output = [ "text" ];
         };
       };
-      "deepseek-r1" = {
+      "DeepSeek-R1-0528" = {
         name = "DeepSeek R1 (LiteLLM)";
         limit = {
           context = 64000;
@@ -320,7 +320,7 @@
         };
       };
       # Qwen Models
-      "qwen3-coder" = {
+      "Qwen3 Coder" = {
         name = "Qwen3 Coder (LiteLLM)";
         limit = {
           context = 65536;
@@ -331,7 +331,7 @@
           output = [ "text" ];
         };
       };
-      "qwen3-235b" = {
+      "Qwen3-235B" = {
         name = "Qwen3 235B (LiteLLM)";
         limit = {
           context = 32768;
@@ -343,7 +343,7 @@
         };
       };
       # GLM Models (Chinese)
-      "glm-5" = {
+      "GLM-5" = {
         name = "GLM-5 (LiteLLM)";
         limit = {
           context = 128000;
