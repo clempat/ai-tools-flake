@@ -14,6 +14,11 @@
       url = "github:coleam00/excalidraw-diagram-skill";
       flake = false;
     };
+
+    homeassistant-ai-skills = {
+      url = "github:homeassistant-ai/skills";
+      flake = false;
+    };
   };
 
   outputs = inputs@{ self, flake-parts, ... }:

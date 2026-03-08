@@ -34,6 +34,22 @@
         "type": "github"
       }
     },
+    "homeassistant-ai-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1770581430,
+        "narHash": "sha256-GN7i7ckrdurU86lum78am+5dXmcPAWoR73VS3zdanXs=",
+        "owner": "homeassistant-ai",
+        "repo": "skills",
+        "rev": "308c4d4ac8aa878e7296ae513b9bef160bc12116",
+        "type": "github"
+      },
+      "original": {
+        "owner": "homeassistant-ai",
+        "repo": "skills",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1772624091,
@@ -89,6 +105,7 @@
       "inputs": {
         "excalidraw-diagram-skill": "excalidraw-diagram-skill",
         "flake-parts": "flake-parts",
+        "homeassistant-ai-skills": "homeassistant-ai-skills",
         "nixpkgs": "nixpkgs",
         "opencode": "opencode"
       }

@@ -173,6 +173,11 @@ let
 
   opencodeSkills = pkgs.runCommandLocal "opencode-skills" { } ''
     mkdir -p "$out"
+    for skill_dir in ${inputs.homeassistant-ai-skills}/*; do
+      if [ -d "$skill_dir" ]; then
+        cp -R "$skill_dir" "$out/"
+      fi
+    done
     cp -R ${../config/skills}/. "$out/"
     rm -rf "$out/excalidraw-diagram" "$out/excalidraw-diagram-skill"
     cp -R ${inputs.excalidraw-diagram-skill}/. "$out/excalidraw-diagram/"

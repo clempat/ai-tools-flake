@@ -233,6 +233,7 @@ ai-tools-flake/
 
 ## Available Skills
 
+- **homeassistant-ai/skills**: Imported upstream skill catalog (as non-flake input)
 - **lint-with-conform**: Format files based on conform config
 - **agent-browser**: Browser automation workflows for agent-browser CLI
 - **excalidraw-diagram**: Generate Excalidraw `.excalidraw` diagrams from text specs
