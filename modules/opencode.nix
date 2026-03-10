@@ -162,53 +162,32 @@ let
   );
 
   ohMyOpencodeBuiltins = [
-    "librarian"
-    "explore"
+    "orchestrator"
+    "explorer"
     "oracle"
-    "metis"
-    "momus"
-    "atlas"
-    "multimodal-looker"
-    "sisyphus-junior"
+    "librarian"
+    "designer"
+    "fixer"
   ];
 
   recommendedModelByAgent = {
-    explore = "opencode/minimax-m2.5-free";
-    librarian = "opencode/minimax-m2.5-free";
-    atlas = "opencode/minimax-m2.5-free";
+    orchestrator = "openai/gpt-5.3-codex";
+    explorer = "openai/gpt-4.1-mini";
     oracle = "openai/gpt-5.3-codex";
-    metis = "openai/gpt-5.3-codex";
-    momus = "openai/gpt-5.3-codex";
-    "multimodal-looker" = "openai/gpt-5.3-codex";
-    "sisyphus-junior" = "opencode/minimax-m2.5-free";
-  };
-
-  recommendedModelByCategory = {
-    quick = "opencode/kimi-k2.5-free";
-    writing = "opencode/kimi-k2.5-free";
-    "unspecified-low" = "opencode/kimi-k2.5-free";
-    "visual-engineering" = "openai/gpt-5.3-codex";
-    deep = "openai/gpt-5.3-codex";
-    "unspecified-high" = "openai/gpt-5.3-codex";
-    ultrabrain = "openai/gpt-5.3-codex";
-    artistry = "openai/gpt-5.3-codex";
+    librarian = "openai/gpt-4.1-mini";
+    designer = "openai/gpt-5.3-codex";
+    fixer = "openai/gpt-4.1-mini";
   };
 
   effectiveModelByAgent =
     (if cfg.opencode.useRecommendedRouting then recommendedModelByAgent else { })
     // cfg.opencode.modelByAgent;
 
-  effectiveModelByCategory =
-    (if cfg.opencode.useRecommendedRouting then recommendedModelByCategory else { })
-    // cfg.opencode.modelByCategory;
-
   resolveOhMyOpencodeModel = name: effectiveModelByAgent.${name} or cfg.opencode.model;
 
   ohMyOpencodeAgents = lib.genAttrs ohMyOpencodeBuiltins (name: {
     model = resolveOhMyOpencodeModel name;
   });
-
-  ohMyOpencodeCategories = lib.mapAttrs (_: model: { model = model; }) effectiveModelByCategory;
 
   opencodeSkills = pkgs.runCommandLocal "opencode-skills" { } ''
     mkdir -p "$out"
@@ -218,6 +197,7 @@ let
       fi
     done
     cp -R ${../config/skills}/. "$out/"
+    chmod -R u+w "$out"
     rm -rf "$out/excalidraw-diagram" "$out/excalidraw-diagram-skill"
     cp -R ${inputs.excalidraw-diagram-skill}/. "$out/excalidraw-diagram/"
   '';
@@ -260,19 +240,62 @@ in
       programs.opencode.commands = shared.commandsAttrSet;
       home.file = {
         ".config/opencode/skills".source = opencodeSkills;
-        ".config/opencode/oh-my-opencode.json".text = builtins.toJSON (
-          {
-            disabled_hooks = [
-              # Home Manager manages ~/.config/opencode as immutable symlinks.
-              # oh-my-opencode auto-update tries to rewrite opencode config and can hit EACCES.
-              "auto-update-checker"
-            ];
-            agents = ohMyOpencodeAgents;
-          }
-          // lib.optionalAttrs (ohMyOpencodeCategories != { }) {
-            categories = ohMyOpencodeCategories;
-          }
-        );
+      } // lib.optionalAttrs (cfg.tmux.enable && cfg.tmux.agentIndicator.enable) {
+        ".config/opencode/plugins/opencode-tmux-agent-indicator.js".text = let
+          script = "${pkgs.tmux-agent-indicator}/share/tmux-plugins/agent-indicator/scripts/agent-state.sh";
+        in ''
+          // tmux-agent-indicator + pane title plugin for OpenCode (nix-managed).
+          export const TmuxAgentIndicator = async ({ $ }) => {
+            const script = "${script}";
+            let lastState = "off";
+            let idleAt = 0;
+
+            const setState = async (state) => {
+              if (state === lastState) return;
+              lastState = state;
+              try {
+                if (state === "running") {
+                  await $`bash ${"$"}{script} --agent opencode --state off`;
+                }
+                await $`bash ${"$"}{script} --agent opencode --state ${"$"}{state}`;
+              } catch {}
+            };
+
+            return {
+              event: async ({ event }) => {
+                if (event.type === "session.status"
+                    && event.properties.status.type === "busy") {
+                  if (Date.now() - idleAt < 2000) return;
+                  await setState("running");
+                }
+                if (event.type === "permission.updated"
+                    || event.type === "permission.asked") {
+                  await setState("needs-input");
+                }
+                if (event.type === "session.idle" || event.type === "session.error") {
+                  idleAt = Date.now();
+                  await setState("done");
+                }
+                if ((event.type === "session.updated" || event.type === "session.created")
+                    && event.properties?.info?.title) {
+                  try {
+                    const title = event.properties.info.title;
+                    await $`tmux select-pane -T ${"$"}{title}`;
+                  } catch {}
+                }
+              },
+              "permission.ask": async () => { await setState("needs-input"); },
+              "tool.execute.before": async (input) => {
+                if (input.tool === "question") await setState("needs-input");
+              },
+            };
+          };
+        '';
+      } // {
+        ".config/opencode/oh-my-opencode-slim.json".text = builtins.toJSON {
+          preset = "nix";
+          presets.nix = ohMyOpencodeAgents;
+        };
       };
     }
   ]);

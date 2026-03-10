@@ -46,7 +46,8 @@
         # Packages from overlay
         packages = {
           inherit (pkgs)
-            spec-kit beads bdui ccusage ccusage-codex ccusage-opencode opencode;
+            spec-kit beads bdui ccusage ccusage-codex ccusage-opencode opencode
+            tmux-agent-indicator tmux-ai-pane-browser;
         } // lib.optionalAttrs pkgs.stdenv.isLinux {
           inherit (pkgs) agent-browser; # chromium only available on Linux
         };

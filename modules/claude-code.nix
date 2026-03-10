@@ -13,7 +13,37 @@ let
   shared = import ./ai-tools-shared.nix { inherit lib pkgs; };
 
   # Beads hook command with optional stealth mode
-  beadsHookCommand = if cfg.beads.hooks.stealth then "bd prime --stealth" else "bd prime";
+  beadsHookCommand =
+    if cfg.beads.hooks.stealth then "bd prime --stealth" else "bd prime";
+
+  # Tmux agent-indicator hook script path
+  agentStateScript =
+    "${pkgs.tmux-agent-indicator}/share/tmux-plugins/agent-indicator/scripts/agent-state.sh";
+
+  mkHookEntry = command: [
+    {
+      matcher = "";
+      hooks = [
+        {
+          type = "command";
+          inherit command;
+        }
+      ];
+    }
+  ];
+
+  beadsHooks = {
+    SessionStart = mkHookEntry beadsHookCommand;
+    PreCompact = mkHookEntry beadsHookCommand;
+  };
+
+  tmuxHooks = {
+    UserPromptSubmit =
+      mkHookEntry "${agentStateScript} --agent claude --state running";
+    PermissionRequest =
+      mkHookEntry "${agentStateScript} --agent claude --state needs-input";
+    Stop = mkHookEntry "${agentStateScript} --agent claude --state done";
+  };
 
   # Hardcoded personal configuration
   baseMcpServers = import ../config/mcps.nix;
@@ -115,33 +145,13 @@ in
           preferredNotifChannel = "native";
           disabledMcpjsonServers = disabledMcpServers;
         }
-        // (optionalAttrs (cfg.beads.enable && cfg.beads.hooks.enable) {
-          # Beads integration hooks - auto-inject workflow context
-          hooks = {
-            SessionStart = [
-              {
-                matcher = "";
-                hooks = [
-                  {
-                    type = "command";
-                    command = beadsHookCommand;
-                  }
-                ];
-              }
-            ];
-            PreCompact = [
-              {
-                matcher = "";
-                hooks = [
-                  {
-                    type = "command";
-                    command = beadsHookCommand;
-                  }
-                ];
-              }
-            ];
-          };
-        });
+        // (let
+          enableBeadsHooks = cfg.beads.enable && cfg.beads.hooks.enable;
+          enableTmuxHooks =
+            cfg.tmux.enable && cfg.tmux.agentIndicator.enable;
+          hooks = (optionalAttrs enableBeadsHooks beadsHooks)
+            // (optionalAttrs enableTmuxHooks tmuxHooks);
+        in optionalAttrs (hooks != { }) { inherit hooks; });
       };
     }
     (mkIf (claudeAgentsDir != null) {

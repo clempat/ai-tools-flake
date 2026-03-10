@@ -16,6 +16,10 @@ final: prev:
     else
       prev.opencode;
   
+  # Tmux integration
+  tmux-agent-indicator = final.callPackage ../pkgs/tmux-agent-indicator.nix { };
+  tmux-ai-pane-browser = final.callPackage ../pkgs/tmux-ai-pane-browser.nix { };
+
   # Use packages from consuming flake's nixpkgs (respects their version choice)
   # These are available in nixpkgs unstable
   mcp-proxy = prev.mcp-proxy;

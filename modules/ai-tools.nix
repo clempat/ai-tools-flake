@@ -26,19 +26,13 @@ in {
         type = types.bool;
         default = true;
         description =
-          "Whether to apply recommended oh-my-opencode agent/category model routing defaults.";
+          "Whether to apply recommended oh-my-opencode-slim agent model routing defaults.";
       };
       modelByAgent = mkOption {
         type = types.attrsOf types.str;
         default = { };
         description =
-          "Per oh-my-opencode built-in agent model overrides (agent-name -> provider/model key). Takes precedence over recommended routing.";
-      };
-      modelByCategory = mkOption {
-        type = types.attrsOf types.str;
-        default = { };
-        description =
-          "Per oh-my-opencode category model overrides (category-name -> provider/model key). Takes precedence over recommended routing.";
+          "Per oh-my-opencode-slim agent model overrides (agent-name -> provider/model key). Takes precedence over recommended routing.";
       };
       plugins = mkOption {
         type = types.listOf types.str;
@@ -47,7 +41,7 @@ in {
           "opencode-antigravity-auth@1.6.0"
           "@tarquinen/opencode-dcp@2.1.8"
           "@franlol/opencode-md-table-formatter@0.0.6"
-          "oh-my-opencode@3.10.0"
+          "oh-my-opencode-slim@0.8.1"
           "opencode-openai-codex-auth@4.4.0"
           "opencode-websearch-cited@1.2.0"
           "@simonwjackson/opencode-direnv@2025.1211.9"
@@ -87,6 +81,26 @@ in {
         description = "What interface to use for hardware acceleration";
       };
     };
+    tmux = {
+      enable = mkOption {
+        type = types.bool;
+        default = false;
+        description =
+          "Enable tmux AI agent integrations (status bar indicator, pane browser)";
+      };
+      agentIndicator.enable = mkOption {
+        type = types.bool;
+        default = true;
+        description =
+          "Enable tmux-agent-indicator hooks for Claude Code and OpenCode";
+      };
+      fzfPaneBrowser.enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Install fzf-based tmux AI pane browser";
+      };
+    };
+
     beads = {
       enable = mkOption {
         type = types.bool;
@@ -127,6 +141,8 @@ in {
         (mkIf cfg.beads.enable [ beads uv ])
         (mkIf (cfg.beads.enable && cfg.beads.ui) [ bdui ])
         (mkIf pkgs.stdenv.isLinux [ agent-browser ])
+        (mkIf (cfg.tmux.enable && cfg.tmux.fzfPaneBrowser.enable)
+          [ tmux-ai-pane-browser ])
       ];
 
     programs.codex.enable = cfg.codex.enable;
