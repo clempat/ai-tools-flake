@@ -37,7 +37,7 @@ in {
       plugins = mkOption {
         type = types.listOf types.str;
         default = [
-          "opencode-beads@0.5.5"
+          "opencode-beads@0.6.0"
           "opencode-antigravity-auth@1.6.0"
           "@tarquinen/opencode-dcp@2.1.8"
           "@franlol/opencode-md-table-formatter@0.0.6"
