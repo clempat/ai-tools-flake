@@ -37,11 +37,11 @@
     "homeassistant-ai-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1773421814,
-        "narHash": "sha256-1tnqb+Cm+OzQKZwTw5zMYdaVpIvrAeD2fdvvn74Vkec=",
+        "lastModified": 1773689394,
+        "narHash": "sha256-CE38URkEAqs+IG5/Jh+Phr2ndMT/Cl6x+m1ccVALCcQ=",
         "owner": "homeassistant-ai",
         "repo": "skills",
-        "rev": "43c94f7844d81c8b6220170ebd9eecc7c3085e50",
+        "rev": "3e873efb990d97383eeaca8f2ab48f672e7e7f06",
         "type": "github"
       },
       "original": {
@@ -52,11 +52,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1773389992,
-        "narHash": "sha256-wvfdLLWJ2I9oEpDd9PfMA8osfIZicoQ5MT1jIwNs9Tk=",
+        "lastModified": 1773646010,
+        "narHash": "sha256-iYrs97hS7p5u4lQzuNWzuALGIOdkPXvjz7bviiBjUu8=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "c06b4ae3d6599a672a6210b7021d699c351eebda",
+        "rev": "5b2c2d84341b2afb5647081c1386a80d7a8d8605",
         "type": "github"
       },
       "original": {
@@ -88,11 +88,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1773620439,
-        "narHash": "sha256-APo6Xj/WDkzAwRBXBZyZnlIwwyCFlDfbP51jz+xWgEo=",
+        "lastModified": 1773699062,
+        "narHash": "sha256-IfnUcGn6RoD0NlhGT1OA0uKkFl7paBLPG7EGaW/2HGw=",
         "owner": "sst",
         "repo": "opencode",
-        "rev": "510374207dcca69a6f7d2a4bae606822662925a2",
+        "rev": "e9a17e4480c8295ae3f72d4ea68c55ae07bfdc41",
         "type": "github"
       },
       "original": {
