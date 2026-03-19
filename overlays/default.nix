@@ -12,7 +12,10 @@ final: prev:
   # Packages from other flakes - only use upstream opencode when bun is new enough
   opencode =
     if builtins.compareVersions prev.bun.version "1.3.10" >= 0 then
-      (inputs.opencode.packages.${final.stdenv.hostPlatform.system}.default or prev.opencode)
+      (inputs.opencode.packages.${final.stdenv.hostPlatform.system}.default or prev.opencode).overrideAttrs
+        (old: {
+          patches = (old.patches or [ ]) ++ [ ../patches/opencode-sort-tools.patch ];
+        })
     else
       prev.opencode;
   
