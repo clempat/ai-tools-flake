@@ -10,7 +10,7 @@
     opencode.url = "github:sst/opencode";
     opencode.inputs.nixpkgs.follows = "nixpkgs";
 
-};
+  };
 
   outputs = inputs@{ self, flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
@@ -37,8 +37,8 @@
         # Packages from overlay
         packages = {
           inherit (pkgs)
-            spec-kit beads bdui ccusage ccusage-codex ccusage-opencode opencode
-            pi-coding-agent tmux-agent-indicator tmux-ai-pane-browser;
+            latchkey spec-kit beads bdui ccusage ccusage-codex ccusage-opencode
+            opencode pi-coding-agent tmux-agent-indicator tmux-ai-pane-browser;
         } // lib.optionalAttrs pkgs.stdenv.isLinux {
           inherit (pkgs) agent-browser; # chromium only available on Linux
         };
@@ -52,6 +52,7 @@
             pkgs.beads
             pkgs.bdui
             pkgs.gh # Required for ticket-driven-developer agent
+            pkgs.latchkey
           ] ++ lib.optionals pkgs.stdenv.isLinux [
             pkgs.agent-browser # chromium only available on Linux
           ];
