@@ -138,6 +138,7 @@ in {
     # Install bdui - TUI for beads issue tracker
     home.packages = with pkgs;
       mkMerge [
+        [ pi-coding-agent ]
         (mkIf cfg.beads.enable [ beads uv ])
         (mkIf (cfg.beads.enable && cfg.beads.ui) [ bdui ])
         (mkIf pkgs.stdenv.isLinux [ agent-browser ])
