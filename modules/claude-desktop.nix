@@ -5,7 +5,6 @@ with lib;
 
 let
   cfg = config.programs.ai-tools;
-  shared = import ./ai-tools-shared.nix { inherit lib pkgs; };
 
   # Hardcoded personal configuration
   baseMcpServers = import ../config/mcps.nix;

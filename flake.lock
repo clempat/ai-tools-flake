@@ -1,21 +1,5 @@
 {
   "nodes": {
-    "excalidraw-diagram-skill": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1772372175,
-        "narHash": "sha256-X0GEwn/1n6jxmnaF0YMMBWpEOaQ8XOy3yigLXkBDi/w=",
-        "owner": "coleam00",
-        "repo": "excalidraw-diagram-skill",
-        "rev": "8646fcc9f74f38539c6cdb4c969723336a96ddcd",
-        "type": "github"
-      },
-      "original": {
-        "owner": "coleam00",
-        "repo": "excalidraw-diagram-skill",
-        "type": "github"
-      }
-    },
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": "nixpkgs-lib"
@@ -31,22 +15,6 @@
       "original": {
         "owner": "hercules-ci",
         "repo": "flake-parts",
-        "type": "github"
-      }
-    },
-    "homeassistant-ai-skills": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1773689394,
-        "narHash": "sha256-CE38URkEAqs+IG5/Jh+Phr2ndMT/Cl6x+m1ccVALCcQ=",
-        "owner": "homeassistant-ai",
-        "repo": "skills",
-        "rev": "3e873efb990d97383eeaca8f2ab48f672e7e7f06",
-        "type": "github"
-      },
-      "original": {
-        "owner": "homeassistant-ai",
-        "repo": "skills",
         "type": "github"
       }
     },
@@ -103,9 +71,7 @@
     },
     "root": {
       "inputs": {
-        "excalidraw-diagram-skill": "excalidraw-diagram-skill",
         "flake-parts": "flake-parts",
-        "homeassistant-ai-skills": "homeassistant-ai-skills",
         "nixpkgs": "nixpkgs",
         "opencode": "opencode"
       }

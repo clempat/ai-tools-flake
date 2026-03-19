@@ -10,16 +10,7 @@
     opencode.url = "github:sst/opencode";
     opencode.inputs.nixpkgs.follows = "nixpkgs";
 
-    excalidraw-diagram-skill = {
-      url = "github:coleam00/excalidraw-diagram-skill";
-      flake = false;
-    };
-
-    homeassistant-ai-skills = {
-      url = "github:homeassistant-ai/skills";
-      flake = false;
-    };
-  };
+};
 
   outputs = inputs@{ self, flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {

@@ -11,11 +11,9 @@ with lib;
 
 let
   cfg = config.programs.ai-tools;
-  shared = import ./ai-tools-shared.nix { inherit lib pkgs; };
 
   # Hardcoded personal configuration
   baseMcpServers = import ../config/mcps.nix;
-  personalAgents = import ../config/agents.nix;
   personalProviders = import ../config/providers.nix;
   personalMemory = ../config/memory.md;
 
@@ -76,91 +74,6 @@ let
   # Convert mcps list to Opencode tools format ({name}*: true)
   mcpListToOpencodeTools = mcps: lib.listToAttrs (map (name: lib.nameValuePair "${name}*" true) mcps);
 
-  renderYaml =
-    indent: attrs:
-    lib.concatStringsSep "\n" (
-      lib.mapAttrsToList (
-        key: value:
-        if builtins.isAttrs value then
-          ''
-            ${indent}${key}:
-            ${renderYaml (indent + "  ") value}''
-        else
-          "${indent}${key}: ${
-            if value == true then
-              "true"
-            else if value == false then
-              "false"
-            else
-              toString value
-          }"
-      ) attrs
-    );
-
-  # Generate opencode agent frontmatter
-  generateOpencodeFrontmatter =
-    name: agent:
-    let
-      # Compute tools section
-      opcodeTools =
-        let
-          agentTools =
-            if (agent.mcps or null) != null then
-              mcpListToOpencodeTools agent.mcps
-            else if (agent.opencodeTools or null) != null then
-              agent.opencodeTools
-            else
-              { };
-        in
-        agentTools;
-
-      fields = [
-        "description: ${agent.description}"
-      ]
-      ++ lib.optional ((agent.mode or null) != null) "mode: ${agent.mode}"
-      ++ lib.optional ((agent.opencodeModel or null) != null) "model: ${agent.opencodeModel}"
-      ++ lib.optional ((agent.temperature or null) != null) "temperature: ${toString agent.temperature}"
-      ++ lib.optional (agent.disable or false) "disable: true";
-
-      toolsSection = lib.optionalString (opcodeTools != { }) ''
-        tools:
-        ${lib.concatStringsSep "\n" (
-          lib.mapAttrsToList (
-            pattern: enabled: "  ${pattern}: ${if enabled then "true" else "false"}"
-          ) opcodeTools
-        )}
-      '';
-
-      permissionSection = lib.optionalString ((agent.permission or null) != null) ''
-        permission:
-        ${renderYaml "  " agent.permission}
-      '';
-    in
-    ''
-      ---
-      ${lib.concatStringsSep "\n" fields}
-      ${toolsSection}
-      ${permissionSection}
-      ---
-    '';
-
-  # Generate opencode agent file with frontmatter + content
-  generateOpencodeAgentFile =
-    name: agent:
-    let
-      frontmatter = generateOpencodeFrontmatter name agent;
-      content = builtins.readFile agent.content;
-    in
-    ''
-      ${frontmatter}
-      ${content}
-    '';
-
-  # Convert agents for OpenCode
-  opencodeAgents = lib.mapAttrs (name: agent: generateOpencodeAgentFile name agent) (
-    lib.filterAttrs (name: agent: !(agent.disable or false)) personalAgents
-  );
-
   ohMyOpencodeBuiltins = [
     "orchestrator"
     "explorer"
@@ -188,19 +101,6 @@ let
   ohMyOpencodeAgents = lib.genAttrs ohMyOpencodeBuiltins (name: {
     model = resolveOhMyOpencodeModel name;
   });
-
-  opencodeSkills = pkgs.runCommandLocal "opencode-skills" { } ''
-    mkdir -p "$out"
-    for skill_dir in ${inputs.homeassistant-ai-skills}/*; do
-      if [ -d "$skill_dir" ]; then
-        cp -R "$skill_dir" "$out/"
-      fi
-    done
-    cp -R ${../config/skills}/. "$out/"
-    chmod -R u+w "$out"
-    rm -rf "$out/excalidraw-diagram" "$out/excalidraw-diagram-skill"
-    cp -R ${inputs.excalidraw-diagram-skill}/. "$out/excalidraw-diagram/"
-  '';
 
 in
 {
@@ -232,15 +132,9 @@ in
         }
       ];
     }
-    (mkIf (opencodeAgents != { }) {
-      programs.opencode.agents = opencodeAgents;
-    })
     {
       programs.opencode.rules = personalMemory;
-      programs.opencode.commands = shared.commandsAttrSet;
-      home.file = {
-        ".config/opencode/skills".source = opencodeSkills;
-      } // lib.optionalAttrs (cfg.tmux.enable && cfg.tmux.agentIndicator.enable) {
+      home.file = lib.optionalAttrs (cfg.tmux.enable && cfg.tmux.agentIndicator.enable) {
         ".config/opencode/plugins/opencode-tmux-agent-indicator.js".text = let
           script = "${pkgs.tmux-agent-indicator}/share/tmux-plugins/agent-indicator/scripts/agent-state.sh";
         in ''
