@@ -19,6 +19,9 @@ final: prev:
     else
       prev.opencode;
   
+  # Pi coding agent
+  pi-coding-agent = final.callPackage ../pkgs/pi-coding-agent.nix { };
+
   # Tmux integration
   tmux-agent-indicator = final.callPackage ../pkgs/tmux-agent-indicator.nix { };
   tmux-ai-pane-browser = final.callPackage ../pkgs/tmux-ai-pane-browser.nix { };
