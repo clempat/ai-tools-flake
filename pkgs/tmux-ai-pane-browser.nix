@@ -42,24 +42,30 @@
       entries="$entries"$'\n'"$entry"
     fi
   done < <(${tmux}/bin/tmux list-panes -a -F '#{pane_id}|#{pane_current_command}|#{session_name}|#{window_name}|#{window_index}|#{pane_index}|#{pane_title}' \
-    | grep -iE 'claude|opencode')
+    | grep -iE 'claude|opencode|π')
 
   if [ -z "$entries" ]; then
     ${tmux}/bin/tmux display-message "No AI agent panes found"
     exit 0
   fi
 
-  selected=$(echo "$entries" | ${fzf}/bin/fzf --ansi --reverse --prompt="AI Panes> " --header="Select an AI agent pane")
+  selected=$(echo "$entries" | ${fzf}/bin/fzf \
+    --ansi --reverse \
+    --prompt="AI Panes> " \
+    --header="Select an AI agent pane" \
+    --preview='pane_id=$(echo {} | ${gawk}/bin/awk -F"| " "{print \$NF}"); ${tmux}/bin/tmux capture-pane -t "$pane_id" -p -S -50' \
+    --preview-window=right:60%:wrap)
 
   if [ -n "$selected" ]; then
     target_pane=$(echo "$selected" | ${gawk}/bin/awk -F'| ' '{print $NF}')
     ${tmux}/bin/tmux switch-client -t "$target_pane"
   fi
-'').overrideAttrs (oldAttrs: {
-  meta = {
-    description = "Fzf-based tmux pane browser for AI agent sessions";
-    license = lib.licenses.mit;
-    platforms = lib.platforms.unix;
-    mainProgram = "tmux-ai-pane-browser";
-  };
-})
+'').overrideAttrs
+  (oldAttrs: {
+    meta = {
+      description = "Fzf-based tmux pane browser for AI agent sessions";
+      license = lib.licenses.mit;
+      platforms = lib.platforms.unix;
+      mainProgram = "tmux-ai-pane-browser";
+    };
+  })
