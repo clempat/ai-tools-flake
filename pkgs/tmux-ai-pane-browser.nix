@@ -23,26 +23,60 @@
     esac
   }
 
-  # List panes running claude or opencode, with agent state
+  # List panes running AI agents.
+  # Detection: match by command/title pattern OR by tmux agent state env var.
   entries=""
   while IFS= read -r line; do
     pane_id=$(echo "$line" | ${gawk}/bin/awk -F'|' '{print $1}')
+    cmd=$(echo "$line" | ${gawk}/bin/awk -F'|' '{print $2}')
     session=$(echo "$line" | ${gawk}/bin/awk -F'|' '{print $3}')
     window_idx=$(echo "$line" | ${gawk}/bin/awk -F'|' '{print $5}')
     pane_idx=$(echo "$line" | ${gawk}/bin/awk -F'|' '{print $6}')
     pane_title=$(echo "$line" | ${gawk}/bin/awk -F'|' '{print $7}')
 
     state=$(${tmux}/bin/tmux show-environment -g "TMUX_AGENT_PANE_''${pane_id}_STATE" 2>/dev/null | sed 's/^[^=]*=//' || true)
+
+    # Include pane if:
+    #  1. command/title matches known AI patterns (claude, opencode, π), OR
+    #  2. agent state env var is set, OR
+    #  3. 'pi' is a child process of this pane (covers pi with base64 image titles)
+    is_ai=false
+    if echo "$line" | grep -qiE 'claude|opencode|π'; then
+      is_ai=true
+    elif [ -n "$state" ]; then
+      is_ai=true
+    else
+      pane_pid=$(${tmux}/bin/tmux display-message -t "$pane_id" -p '#{pane_pid}' 2>/dev/null || true)
+      if [ -n "$pane_pid" ] && pgrep -P "$pane_pid" -x pi >/dev/null 2>&1; then
+        is_ai=true
+      fi
+    fi
+
+    if [ "$is_ai" = false ]; then
+      continue
+    fi
+
     icon=$(state_icon "$state")
 
-    entry="$icon $session  [$pane_title] ($window_idx.$pane_idx) | $pane_id"
+    # Clean display title: use pane_title if it looks like a real title, else session name
+    display_title=""
+    if [ ''${#pane_title} -lt 80 ] && ! echo "$pane_title" | grep -qE '^[A-Za-z0-9+/=]{20,}'; then
+      # Strip "π - " prefix since we already show the session name
+      display_title=$(echo "$pane_title" | sed 's/^π - //')
+    fi
+
+    # Format: "icon session / title | pane_id"  (title only if different from session)
+    if [ -n "$display_title" ] && [ "$display_title" != "$session" ]; then
+      entry="$icon $session / $display_title | $pane_id"
+    else
+      entry="$icon $session | $pane_id"
+    fi
     if [ -z "$entries" ]; then
       entries="$entry"
     else
       entries="$entries"$'\n'"$entry"
     fi
-  done < <(${tmux}/bin/tmux list-panes -a -F '#{pane_id}|#{pane_current_command}|#{session_name}|#{window_name}|#{window_index}|#{pane_index}|#{pane_title}' \
-    | grep -iE 'claude|opencode|π')
+  done < <(${tmux}/bin/tmux list-panes -a -F '#{pane_id}|#{pane_current_command}|#{session_name}|#{window_name}|#{window_index}|#{pane_index}|#{pane_title}')
 
   if [ -z "$entries" ]; then
     ${tmux}/bin/tmux display-message "No AI agent panes found"
@@ -52,9 +86,12 @@
   selected=$(echo "$entries" | ${fzf}/bin/fzf \
     --ansi --reverse \
     --prompt="AI Panes> " \
-    --header="Select an AI agent pane" \
-    --preview='pane_id=$(echo {} | ${gawk}/bin/awk -F"| " "{print \$NF}"); ${tmux}/bin/tmux capture-pane -t "$pane_id" -p -S -50' \
-    --preview-window=right:60%:wrap)
+    --header="↑↓ navigate · enter switch · esc cancel" \
+    --preview='pane_id=$(echo {} | ${gawk}/bin/awk -F"| " "{print \$NF}"); ${tmux}/bin/tmux capture-pane -t "$pane_id" -p -S -80' \
+    --preview-window='right,60%,wrap,border-left' \
+    --preview-label=' Preview ' \
+    --color='preview-border:grey' \
+    --bind='ctrl-/:toggle-preview')
 
   if [ -n "$selected" ]; then
     target_pane=$(echo "$selected" | ${gawk}/bin/awk -F'| ' '{print $NF}')

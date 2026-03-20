@@ -119,6 +119,12 @@ in
             # OpenCode tools key schema seems to reject ':'; disable whole default_api.
             "default_api*" = false;
           };
+          # Use typescript-go (tsgo) instead of typescript-language-server
+          # 10x faster, 10% memory footprint vs tsserver
+          lsp.typescript = {
+            command = [ "${pkgs.typescript-go}/bin/tsgo" "--lsp" "--stdio" ];
+            extensions = [ ".ts" ".tsx" ".js" ".jsx" ".mjs" ".cjs" ".mts" ".cts" ];
+          };
         };
       };
     }
