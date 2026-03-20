@@ -45,6 +45,7 @@ in {
           "opencode-openai-codex-auth@4.4.0"
           "opencode-websearch-cited@1.2.0"
           "@simonwjackson/opencode-direnv@2025.1211.9"
+          "superpowers@git+https://github.com/obra/superpowers.git"
         ];
         description = "OpenCode npm plugins (name@version).";
       };
