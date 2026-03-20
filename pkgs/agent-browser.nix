@@ -16,7 +16,7 @@ stdenvNoCC.mkDerivation {
 
   src = fetchurl {
     url = "https://registry.npmjs.org/agent-browser/-/agent-browser-${version}.tgz";
-    hash = "sha256-CnN2wYmPq/aFNPWwrCX8AhVReyuX/3xNjk5YKlk/oY=";
+    hash = "sha256-8U11ZITBKyAAeoafaCrk3vo/T0uewSMIrQosOC3jzs8=";
   };
 
   sourceRoot = "package";
