@@ -1,30 +1,63 @@
-{ lib, writeShellScriptBin, nodejs, chromium }:
+{
+  lib,
+  stdenvNoCC,
+  fetchurl,
+  makeWrapper,
+  nodejs,
+  chromium,
+}:
 
-(writeShellScriptBin "agent-browser" ''
-  set -euo pipefail
+let
+  version = "0.21.2";
+in
+stdenvNoCC.mkDerivation {
+  pname = "agent-browser";
+  inherit version;
 
-  # Set Chrome path to nix chromium
-  export CHROME_PATH="${chromium}/bin/chromium"
-  export PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH="${chromium}/bin/chromium"
+  src = fetchurl {
+    url = "https://registry.npmjs.org/agent-browser/-/agent-browser-${version}.tgz";
+    hash = "sha256-CnN2wYmPq/aFNPWwrCX8AhVReyuX/3xNjk5YKlk/oY=";
+  };
 
-  # Use npx to run agent-browser (downloads on first use if needed)
-  exec ${nodejs}/bin/npx -y agent-browser@latest "$@"
-'').overrideAttrs (oldAttrs: {
+  sourceRoot = "package";
+  nativeBuildInputs = [ makeWrapper ];
+
+  installPhase =
+    let
+      nativeBin = {
+        "x86_64-linux" = "agent-browser-linux-x64";
+        "aarch64-linux" = "agent-browser-linux-arm64";
+        "x86_64-darwin" = "agent-browser-darwin-x64";
+        "aarch64-darwin" = "agent-browser-darwin-arm64";
+      }.${stdenvNoCC.hostPlatform.system} or (throw "Unsupported platform: ${stdenvNoCC.hostPlatform.system}");
+    in
+    ''
+      runHook preInstall
+      mkdir -p $out/lib/agent-browser $out/bin
+
+      cp -R . $out/lib/agent-browser/
+
+      # Try native binary first, fall back to Node.js entrypoint
+      if [ -f "$out/lib/agent-browser/bin/${nativeBin}" ]; then
+        chmod +x "$out/lib/agent-browser/bin/${nativeBin}"
+        makeWrapper "$out/lib/agent-browser/bin/${nativeBin}" $out/bin/agent-browser \
+          --set CHROME_PATH "${chromium}/bin/chromium" \
+          --set PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH "${chromium}/bin/chromium"
+      else
+        makeWrapper ${nodejs}/bin/node $out/bin/agent-browser \
+          --add-flags "$out/lib/agent-browser/bin/agent-browser.js" \
+          --set CHROME_PATH "${chromium}/bin/chromium" \
+          --set PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH "${chromium}/bin/chromium"
+      fi
+
+      runHook postInstall
+    '';
+
   meta = {
     description = "Browser automation CLI for AI agents";
-    longDescription = ''
-      agent-browser is a headless browser automation CLI for AI agents with
-      a fast Rust implementation and Node.js fallback.
-
-      This package provides a wrapper that uses npx to run agent-browser with
-      the Nix-provided chromium browser. No manual chromium installation needed.
-
-      Note: First run may download the agent-browser package from npm.
-    '';
     homepage = "https://github.com/vercel-labs/agent-browser";
     license = lib.licenses.asl20;
-    maintainers = [ ];
     mainProgram = "agent-browser";
-    platforms = lib.platforms.linux;
+    platforms = lib.platforms.linux; # chromium dependency
   };
-})
+}
