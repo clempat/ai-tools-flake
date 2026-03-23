@@ -58,16 +58,24 @@
 
     icon=$(state_icon "$state")
 
-    # Clean display title: use pane_title if it looks like a real title, else session name
+    # Extract display title from pane_title.
+    # Pane title is set by auto-title extension: "π <project> · <topic>"
+    # Or legacy: "π - <project>" or raw base64 garbage.
     display_title=""
-    if [ ''${#pane_title} -lt 80 ] && ! echo "$pane_title" | grep -qE '^[A-Za-z0-9+/=]{20,}'; then
-      # Strip "π - " prefix since we already show the session name
-      display_title=$(echo "$pane_title" | sed 's/^π - //')
+    if echo "$pane_title" | grep -q ' · '; then
+      # New format: "π project · topic" → extract topic
+      display_title=$(echo "$pane_title" | sed 's/^.*· //')
     fi
 
-    # Format: "icon session / title | pane_id"  (title only if different from session)
+    # Skip if pane_title is base64 junk or too long
+    if [ -z "$display_title" ] && [ ''${#pane_title} -lt 80 ] \
+       && ! echo "$pane_title" | grep -qE '[A-Za-z0-9+/=]{20,}'; then
+      display_title=$(echo "$pane_title" | sed 's/^π - //; s/^π //')
+    fi
+
+    # Format: "icon session · topic | pane_id"
     if [ -n "$display_title" ] && [ "$display_title" != "$session" ]; then
-      entry="$icon $session / $display_title | $pane_id"
+      entry="$icon $session · $display_title | $pane_id"
     else
       entry="$icon $session | $pane_id"
     fi
@@ -86,12 +94,13 @@
   selected=$(echo "$entries" | ${fzf}/bin/fzf \
     --ansi --reverse \
     --prompt="AI Panes> " \
-    --header="↑↓ navigate · enter switch · esc cancel" \
+    --header="↑↓ navigate · enter switch · ^p preview · esc cancel" \
     --preview='pane_id=$(echo {} | ${gawk}/bin/awk -F"| " "{print \$NF}"); ${tmux}/bin/tmux capture-pane -t "$pane_id" -p -S -80' \
-    --preview-window='right,60%,wrap,border-left' \
+    --preview-window='right,60%,wrap,border-left,hidden' \
     --preview-label=' Preview ' \
     --color='preview-border:grey' \
-    --bind='ctrl-/:toggle-preview')
+    --bind='ctrl-/:toggle-preview' \
+    --bind='ctrl-p:toggle-preview')
 
   if [ -n "$selected" ]; then
     target_pane=$(echo "$selected" | ${gawk}/bin/awk -F'| ' '{print $NF}')

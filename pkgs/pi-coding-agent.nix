@@ -7,7 +7,7 @@
 
 buildNpmPackage rec {
   pname = "pi-coding-agent";
-  version = "0.61.0";
+  version = "0.62.0";
 
   # Use a wrapper package.json that pulls in the published npm package
   src = lib.fileset.toSource {
