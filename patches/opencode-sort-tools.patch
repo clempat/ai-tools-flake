@@ -1,24 +1,12 @@
 diff -ruN a/packages/opencode/src/tool/skill.ts b/packages/opencode/src/tool/skill.ts
 --- a/packages/opencode/src/tool/skill.ts
 +++ b/packages/opencode/src/tool/skill.ts
-@@ -7,7 +7,7 @@
- import { iife } from "@/util/iife"
+@@ -19,7 +19,7 @@
+     const rg = yield* Ripgrep.Service
+     return () =>
+       Effect.gen(function* () {
+-        const list = yield* skill.available().pipe(Effect.provide(EffectLogger.layer))
++        const list = yield* skill.available().pipe(Effect.provide(EffectLogger.layer), Effect.map((x) => [...x].sort((a, b) => a.name.localeCompare(b.name))))
 
- export const SkillTool = Tool.define("skill", async (ctx) => {
--  const list = await Skill.available(ctx?.agent)
-+  const list = await Skill.available(ctx?.agent).then((x) => [...x].sort((a, b) => a.name.localeCompare(b.name)))
-
-   const description =
-     list.length === 0
-diff -ruN a/packages/opencode/src/tool/task.ts b/packages/opencode/src/tool/task.ts
---- a/packages/opencode/src/tool/task.ts
-+++ b/packages/opencode/src/tool/task.ts
-@@ -36,7 +36,7 @@
-
-   const description = DESCRIPTION.replace(
-     "{agents}",
--    accessibleAgents
-+    [...accessibleAgents].sort((a, b) => a.name.localeCompare(b.name))
-       .map((a) => `- ${a.name}: ${a.description ?? "This subagent should only be called manually by the user."}`)
-       .join("\n"),
-   )
+         const description =
+           list.length === 0
