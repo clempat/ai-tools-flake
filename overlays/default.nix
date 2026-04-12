@@ -16,6 +16,10 @@ final: prev:
       (inputs.opencode.packages.${final.stdenv.hostPlatform.system}.default or prev.opencode).overrideAttrs
         (old: {
           patches = (old.patches or [ ]) ++ [ ../patches/opencode-sort-tools.patch ];
+          postPatch = (old.postPatch or "") + ''
+            # Relax bun version requirement to match nixpkgs
+            sed -i 's/"bun@[0-9.]*"/"bun@${prev.bun.version}"/' package.json
+          '';
         })
     else
       prev.opencode;
