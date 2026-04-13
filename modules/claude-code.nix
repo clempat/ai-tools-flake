@@ -87,5 +87,8 @@ in
     {
       programs.claude-code.memory.source = personalMemory;
     }
+    {
+      programs.zsh.shellAliases.cc = "claude --permission-mode bypass";
+    }
   ]);
 }
