@@ -1,17 +1,35 @@
 # Default MCP server configurations (claude-code format)
 #
+# Architecture:
+# - Bifrost Code Mode: primary MCP gateway (4 meta-tools, lazy discovery)
+#   Servers in Bifrost: slack, exa, refs, ha-extended, mensa, schoolfox, matrix, honcho
+# - Local servers: stdio-based, run on workstation directly
+# - mcp.patout.app: legacy gateway, to be migrated into Bifrost (follow-up)
+#
 # Claude Desktop Integration:
 # - ALL servers included in claude_desktop_config.json
-# - stdio servers: Direct stdio connection ✓
-# - http servers: Via mcp-proxy (as stdio) ✓
-# - Toggle state controlled manually in Claude Desktop UI (persists across restarts)
-# - enable flag has no effect on Claude Desktop (only affects OpenCode)
+# - stdio servers: Direct stdio connection
+# - http servers: Via mcp-proxy (as stdio)
+# - Toggle state controlled manually in Claude Desktop UI
 #
 # OpenCode Integration:
 # - ALL servers included in config.json
 # - enable = false → Disabled via tools section (lazy loading)
 # - enable = true → Enabled and active
 {
+  # ── Bifrost Code Mode (platform-level lazy MCP discovery) ──────────
+  # All MCP servers registered in Bifrost are accessible through 4 meta-tools:
+  # listToolFiles, readToolFile, getToolDocs, executeToolCode
+  # No per-server schema bloat — tools discovered on demand.
+  bifrost = {
+    enable = true;
+    type = "http";
+    url = "https://bifrost.patout.xyz/mcp";
+    # Auth: OneCLI MITM proxy injects Bifrost virtual key on ai-workstation-01
+    # No key in config — agentic work only runs on ai-workstation-01
+  };
+
+  # ── Local servers (stdio, run on workstation) ──────────────────────
   nixos = {
     enable = false;
     type = "stdio";
@@ -25,13 +43,37 @@
 
   figma-desktop = {
     enable = false;
-    type = "http"; # ⚠ Add manually: http://127.0.0.1:3845/mcp
+    type = "http";
     url = "http://127.0.0.1:3845/mcp";
   };
 
+  chrome-devtools = {
+    enable = false;
+    type = "stdio";
+    command = "npx";
+    args = [
+      "-y"
+      "chrome-devtools-mcp@latest"
+    ];
+  };
+
+  beads = {
+    enable = true; # Can be overridden by ai-tools.beads.enable
+    type = "stdio";
+    command = "uv";
+    args = [
+      "run"
+      "--with"
+      "beads-mcp"
+      "beads-mcp"
+    ];
+    env = { };
+  };
+
+  # ── Legacy mcp.patout.app (migrate into Bifrost as follow-up) ─────
   atlassian = {
     enable = false;
-    type = "http"; # ⚠ Add manually: https://mcp.patout.app/mcp/atlassian
+    type = "http";
     url = "https://mcp.patout.app/mcp/atlassian";
     headers = {
       Authorization = "Bearer wH0wuvH41jffjE1aFO7qlcl0OX7TtvWj";
@@ -92,41 +134,13 @@
     };
   };
 
-  refs = {
-    enable = true;
-    type = "http";
-    url = "https://mcp.patout.app/mcp/refs";
-    headers = {
-      Authorization = "Bearer wH0wuvH41jffjE1aFO7qlcl0OX7TtvWj";
-    };
-  };
-
-  exa = {
-    enable = true;
-    type = "http";
-    url = "https://mcp.patout.app/mcp/exa";
-    headers = {
-      Authorization = "Bearer wH0wuvH41jffjE1aFO7qlcl0OX7TtvWj";
-    };
-  };
-
   grep_app = {
-    enable = true;
+    enable = false;
     type = "http";
     url = "https://mcp.patout.app/mcp/grep_app";
     headers = {
       Authorization = "Bearer wH0wuvH41jffjE1aFO7qlcl0OX7TtvWj";
     };
-  };
-
-  chrome-devtools = {
-    enable = false;
-    type = "stdio";
-    command = "npx";
-    args = [
-      "-y"
-      "chrome-devtools-mcp@latest"
-    ];
   };
 
   unifi = {
@@ -151,28 +165,6 @@
     enable = false;
     type = "http";
     url = "https://mcp.patout.app/mcp/youtube";
-    headers = {
-      Authorization = "Bearer wH0wuvH41jffjE1aFO7qlcl0OX7TtvWj";
-    };
-  };
-
-  beads = {
-    enable = true; # Can be overridden by ai-tools.beads.enable
-    type = "stdio";
-    command = "uv";
-    args = [
-      "run"
-      "--with"
-      "beads-mcp"
-      "beads-mcp"
-    ];
-    env = { };
-  };
-
-  ha-extended = {
-    enable = false;
-    type = "http";
-    url = "https://mcp.patout.app/mcp/ha-extended";
     headers = {
       Authorization = "Bearer wH0wuvH41jffjE1aFO7qlcl0OX7TtvWj";
     };
