@@ -13,7 +13,6 @@ let
 
   # Hardcoded personal configuration
   baseMcpServers = import ../config/mcps.nix;
-  personalMemory = ../config/memory.md;
 
   # Override beads MCP server enable state based on ai-tools.beads.enable
   personalMcpServers =
@@ -34,9 +33,7 @@ in
         mcpServers = personalMcpServers;
       };
     }
-    {
-      programs.claude-code.memory.source = personalMemory;
-    }
+    # CLAUDE.md is managed by ai-config dotbot (SOUL.md symlink), not nix
     {
       programs.zsh.shellAliases.cc = "claude --dangerously-skip-permissions";
     }
