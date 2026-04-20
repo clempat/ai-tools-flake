@@ -37,7 +37,7 @@
         # Packages from overlay
         packages = {
           inherit (pkgs)
-            latchkey spec-kit beads bdui ccusage ccusage-codex ccusage-opencode
+            latchkey spec-kit
             opencode pi-coding-agent tmux-agent-indicator tmux-ai-pane-browser;
         } // lib.optionalAttrs pkgs.stdenv.isLinux {
           inherit (pkgs) agent-browser; # chromium only available on Linux
@@ -49,8 +49,6 @@
           packages = [
             pkgs.opencode
             pkgs.claude-code
-            pkgs.beads
-            pkgs.bdui
             pkgs.gh # Required for ticket-driven-developer agent
             pkgs.latchkey
           ] ++ lib.optionals pkgs.stdenv.isLinux [
@@ -58,7 +56,7 @@
           ];
 
           shellHook = ''
-            echo "AI Tools: opencode, claude-code, beads (bd), bdui, agent-browser, gh"
+            echo "AI Tools: opencode, claude-code, agent-browser, gh"
             echo "For full config: use nixosModules.default"
           '';
         };

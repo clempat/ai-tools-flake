@@ -37,7 +37,6 @@ in {
       plugins = mkOption {
         type = types.listOf types.str;
         default = [
-          "opencode-beads@0.6.0"
           "opencode-antigravity-auth@1.6.0"
           "@tarquinen/opencode-dcp@2.1.8"
           "@franlol/opencode-md-table-formatter@0.0.6"
@@ -102,46 +101,12 @@ in {
       };
     };
 
-    beads = {
-      enable = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Enable beads issue tracker integration";
-      };
-
-      ui = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Enable bdui TUI for beads issue tracker";
-      };
-
-      hooks = {
-        enable = mkOption {
-          type = types.bool;
-          default = true;
-          description =
-            "Enable beads hooks for Claude Code (SessionStart, PreCompact)";
-        };
-
-        stealth = mkOption {
-          type = types.bool;
-          default = false;
-          description = "Use stealth mode for beads hooks (no git operations)";
-        };
-      };
-    };
-
   };
 
   config = mkIf cfg.enable {
-    # Install beads (bd) - git-backed issue tracker for AI agents
-    # Install uv - Python package manager needed for beads-mcp
-    # Install bdui - TUI for beads issue tracker
     home.packages = with pkgs;
       mkMerge [
         [ pi-coding-agent latchkey ]
-        (mkIf cfg.beads.enable [ beads uv ])
-        (mkIf (cfg.beads.enable && cfg.beads.ui) [ bdui ])
         (mkIf pkgs.stdenv.isLinux [ agent-browser ])
         (mkIf (cfg.tmux.enable && cfg.tmux.fzfPaneBrowser.enable)
           [ tmux-ai-pane-browser ])

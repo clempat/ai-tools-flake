@@ -17,14 +17,7 @@ let
   personalProviders = import ../config/providers.nix;
   personalMemory = ../config/memory.md;
 
-  # Override beads MCP server enable state based on ai-tools.beads.enable
-  personalMcpServers =
-    baseMcpServers
-    // (optionalAttrs (baseMcpServers ? beads) {
-      beads = baseMcpServers.beads // {
-        enable = cfg.beads.enable;
-      };
-    });
+  personalMcpServers = baseMcpServers;
 
   allMcpNames = lib.attrNames personalMcpServers;
   invalidDefaultEnabledMcpTools = lib.filter (

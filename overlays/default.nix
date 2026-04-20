@@ -4,11 +4,6 @@ final: prev:
   # Custom packages - use consuming flake's nixpkgs
   latchkey = final.callPackage ../pkgs/latchkey.nix { };
   spec-kit = final.callPackage ../pkgs/spec-kit.nix { };
-  beads = final.callPackage ../pkgs/beads.nix { };
-  bdui = final.callPackage ../pkgs/bdui.nix { };
-  ccusage = final.callPackage ../pkgs/ccusage.nix { };
-  ccusage-codex = final.callPackage ../pkgs/ccusage-codex.nix { };
-  ccusage-opencode = final.callPackage ../pkgs/ccusage-opencode.nix { };
 
   # Packages from other flakes - only use upstream opencode when bun is new enough
   opencode =

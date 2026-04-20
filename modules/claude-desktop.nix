@@ -9,10 +9,7 @@ let
   # Hardcoded personal configuration
   baseMcpServers = import ../config/mcps.nix;
   
-  # Override beads MCP server enable state based on ai-tools.beads.enable
-  personalMcpServers = baseMcpServers // (optionalAttrs (baseMcpServers ? beads) {
-    beads = baseMcpServers.beads // { enable = cfg.beads.enable; };
-  });
+  personalMcpServers = baseMcpServers;
 
   # Capture PATH from the shell at evaluation time (when home-manager switch runs)
   # This ensures Claude Desktop MCP servers have access to the same binaries as your terminal
