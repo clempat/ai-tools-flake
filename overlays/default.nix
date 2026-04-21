@@ -10,7 +10,6 @@ final: prev:
     if builtins.compareVersions prev.bun.version "1.3.10" >= 0 then
       (inputs.opencode.packages.${final.stdenv.hostPlatform.system}.default or prev.opencode).overrideAttrs
         (old: {
-          patches = (old.patches or [ ]) ++ [ ../patches/opencode-sort-tools.patch ];
           postPatch = (old.postPatch or "") + ''
             # Relax bun version requirement to match nixpkgs
             sed -i 's/"bun@[0-9.]*"/"bun@${prev.bun.version}"/' package.json
