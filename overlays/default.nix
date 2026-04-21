@@ -5,18 +5,9 @@ final: prev:
   latchkey = final.callPackage ../pkgs/latchkey.nix { };
   spec-kit = final.callPackage ../pkgs/spec-kit.nix { };
 
-  # Packages from other flakes - only use upstream opencode when bun is new enough
+  # Packages from other flakes
   opencode =
-    if builtins.compareVersions prev.bun.version "1.3.10" >= 0 then
-      (inputs.opencode.packages.${final.stdenv.hostPlatform.system}.default or prev.opencode).overrideAttrs
-        (old: {
-          postPatch = (old.postPatch or "") + ''
-            # Relax bun version requirement to match nixpkgs
-            sed -i 's/"bun@[0-9.]*"/"bun@${prev.bun.version}"/' package.json
-          '';
-        })
-    else
-      prev.opencode;
+    inputs.opencode.packages.${final.stdenv.hostPlatform.system}.default or prev.opencode;
   
   # Pi coding agent
   pi-coding-agent = final.callPackage ../pkgs/pi-coding-agent.nix { };
