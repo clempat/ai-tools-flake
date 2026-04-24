@@ -5,7 +5,7 @@
 }:
 
 let
-  version = "0.69.0";
+  version = "0.70.0";
 in
 writeShellScriptBin "pi" ''
   export PATH="${nodejs_22}/bin:$PATH"

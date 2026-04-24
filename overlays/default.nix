@@ -5,10 +5,6 @@ final: prev:
   latchkey = final.callPackage ../pkgs/latchkey.nix { };
   spec-kit = final.callPackage ../pkgs/spec-kit.nix { };
 
-  # Use nixpkgs opencode until upstream flake build is fixed
-  # (prettier dep missing + nixpkgs.follows causes hash mismatch)
-  opencode = prev.opencode;
-  
   # Pi coding agent
   pi-coding-agent = final.callPackage ../pkgs/pi-coding-agent.nix { };
 

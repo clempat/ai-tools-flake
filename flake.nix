@@ -6,11 +6,6 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
     flake-parts.url = "github:hercules-ci/flake-parts";
-
-    # Pinned: fc5b353 is last rev before prettier dep broke nix build (35730199)
-    opencode.url = "github:sst/opencode/fc5b353144b6d370df21e2da3a8c1fad7e63123a";
-    opencode.inputs.nixpkgs.follows = "nixpkgs";
-
   };
 
   outputs = inputs@{ self, flake-parts, ... }:
