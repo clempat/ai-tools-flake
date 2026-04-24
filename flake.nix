@@ -8,7 +8,7 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
 
     # Pinned: fc5b353 is last rev before prettier dep broke nix build (35730199)
-    opencode.url = "github:sst/opencode/fc5b353144b6d370df21e2da3a8c1fad7e63123a";
+    opencode.url = "github:sst/opencode/6c1268f3b18ed289bc524ed10add8c3caa6131d2";
     opencode.inputs.nixpkgs.follows = "nixpkgs";
 
   };
