@@ -33,8 +33,8 @@
         # Packages from overlay
         packages = {
           inherit (pkgs)
-            latchkey spec-kit
-            opencode pi-coding-agent tmux-agent-indicator tmux-ai-pane-browser;
+            spec-kit opencode
+            pi-coding-agent tmux-agent-indicator tmux-ai-pane-browser;
         } // lib.optionalAttrs pkgs.stdenv.isLinux {
           inherit (pkgs) agent-browser; # chromium only available on Linux
         };
@@ -46,7 +46,6 @@
             pkgs.opencode
             pkgs.claude-code
             pkgs.gh # Required for ticket-driven-developer agent
-            pkgs.latchkey
           ] ++ lib.optionals pkgs.stdenv.isLinux [
             pkgs.agent-browser # chromium only available on Linux
           ];

@@ -106,7 +106,7 @@ in {
   config = mkIf cfg.enable {
     home.packages = with pkgs;
       mkMerge [
-        [ pi-coding-agent latchkey ]
+        [ pi-coding-agent ]
         (mkIf pkgs.stdenv.isLinux [ agent-browser ])
         (mkIf (cfg.tmux.enable && cfg.tmux.fzfPaneBrowser.enable)
           [ tmux-ai-pane-browser ])

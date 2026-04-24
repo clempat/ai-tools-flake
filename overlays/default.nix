@@ -2,7 +2,6 @@
 final: prev:
 {
   # Custom packages - use consuming flake's nixpkgs
-  latchkey = final.callPackage ../pkgs/latchkey.nix { };
   spec-kit = final.callPackage ../pkgs/spec-kit.nix { };
 
   # Pi coding agent
