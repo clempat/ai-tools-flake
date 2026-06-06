@@ -23,6 +23,16 @@
       ],
       "datasourceTemplate": "npm",
       "versioningTemplate": "npm"
+    },
+    {
+      "customType": "regex",
+      "description": "pi coding agent wrapper version",
+      "managerFilePatterns": ["/^pkgs\\/pi-coding-agent\\.nix$/"],
+      "matchStrings": [
+        "# renovate: datasource=npm depName=(?<depName>[^\\s]+)\\s+version = \\\"(?<currentValue>[0-9][0-9A-Za-z.+-]*)\\\";"
+      ],
+      "datasourceTemplate": "npm",
+      "versioningTemplate": "npm"
     }
   ],
   "packageRules": [
