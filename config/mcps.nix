@@ -1,17 +1,19 @@
 # MCP server configurations (claude-code format)
 #
 # Architecture:
-# - Bifrost Code Mode: single MCP gateway with lazy tool discovery
-#   4 meta-tools: listToolFiles, readToolFile, getToolDocs, executeToolCode
-#   All remote MCP servers accessed through Bifrost (no mcp.patout.app)
+# - MCPHub smart routing: single gateway with lazy tool discovery
+#   All remote MCP servers accessed through MCPHub (mcp.patout.xyz)
 # - Local servers: stdio-based, run on workstation directly
 # - CLI tools: atlassian (acli), github (gh) — no MCP needed
 {
-  # ── Bifrost Code Mode (platform-level lazy MCP discovery) ──────────
-  bifrost = {
+  # ── MCPHub smart routing (platform-level lazy MCP discovery) ───────
+  mcphub_shared = {
     enable = true;
     type = "http";
-    url = "https://bifrost.patout.xyz/mcp";
+    url = "https://mcp.patout.xyz/mcp/$smart/Shared";
+    headers = {
+      Authorization = "Bearer {env:MCPHUB_API_KEY}";
+    };
   };
 
 }
