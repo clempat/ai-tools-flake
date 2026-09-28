@@ -116,7 +116,7 @@ in
           # and replace with tsgo (10x faster, 10% memory)
           lsp.typescript.disabled = true;
           lsp.tsgo = {
-            command = [ "${pkgs.typescript-go}/bin/tsgo" "--lsp" "--stdio" ];
+            command = [ "${pkgs.typescript}/bin/tsc" "--lsp" "--stdio" ];
             extensions = [ ".ts" ".tsx" ".js" ".jsx" ".mjs" ".cjs" ".mts" ".cts" ];
           };
         };
