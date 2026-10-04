@@ -35,7 +35,7 @@
           inherit (pkgs)
             spec-kit opencode
             pi-coding-agent tmux-agent-indicator tmux-ai-pane-browser;
-        } // lib.optionalAttrs pkgs.stdenv.isLinux {
+        } // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
           inherit (pkgs) agent-browser; # chromium only available on Linux
         };
 
@@ -46,7 +46,7 @@
             pkgs.opencode
             pkgs.claude-code
             pkgs.gh # Required for ticket-driven-developer agent
-          ] ++ lib.optionals pkgs.stdenv.isLinux [
+          ] ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
             pkgs.agent-browser # chromium only available on Linux
           ];
 

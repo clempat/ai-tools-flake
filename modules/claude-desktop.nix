@@ -9,7 +9,7 @@ with lib;
 
 let
   cfg = config.programs.ai-tools;
-  isDarwin = pkgs.stdenv.isDarwin;
+  isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
 in {
   config = mkIf (cfg.enable && isDarwin) {
     home.packages = [ pkgs.mcp-proxy ];

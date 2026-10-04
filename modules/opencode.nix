@@ -133,7 +133,7 @@ in
       ];
     }
     {
-      programs.opencode.rules = personalMemory;
+      programs.opencode.context = personalMemory;
       home.file = lib.optionalAttrs (cfg.tmux.enable && cfg.tmux.agentIndicator.enable) {
         ".config/opencode/plugins/opencode-tmux-agent-indicator.js".text = let
           script = "${pkgs.tmux-agent-indicator}/share/tmux-plugins/agent-indicator/scripts/agent-state.sh";
