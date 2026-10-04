@@ -15,7 +15,7 @@ final: prev:
   # These are available in nixpkgs unstable
   mcp-proxy = prev.mcp-proxy;
   claude-code = prev.claude-code;
-} // (if (prev ? stdenv) && (prev.stdenv ? isLinux) && prev.stdenv.isLinux then {
+} // (if (prev ? stdenv) && (prev.stdenv ? hostPlatform) && prev.stdenv.hostPlatform.isLinux then {
   # chromium is Linux-only in nixpkgs; avoid eval failures on Darwin
   agent-browser = final.callPackage ../pkgs/agent-browser.nix { };
 } else { })

@@ -107,14 +107,14 @@ in {
     home.packages = with pkgs;
       mkMerge [
         [ pi-coding-agent ]
-        (mkIf pkgs.stdenv.isLinux [ agent-browser ])
+        (mkIf pkgs.stdenv.hostPlatform.isLinux [ agent-browser ])
         (mkIf (cfg.tmux.enable && cfg.tmux.fzfPaneBrowser.enable)
           [ tmux-ai-pane-browser ])
       ];
 
     programs.codex.enable = cfg.codex.enable;
 
-    services.ollama = mkIf (cfg.ollama.enable && !pkgs.stdenv.isDarwin) {
+    services.ollama = mkIf (cfg.ollama.enable && !pkgs.stdenv.hostPlatform.isDarwin) {
       inherit (cfg.ollama) acceleration;
       enable = true;
       environmentVariables = { OLLAMA_CONTEXT_LENGTH = "32768"; };
